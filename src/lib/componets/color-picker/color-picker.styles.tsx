@@ -1,46 +1,47 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
-export const StyledColorPickerContainer = styled.div`
+export const Container = styled.div`
   position: absolute;
   z-index: 50;
-  padding: 0.5rem;
+
+  padding: 10px;
+  box-sizing: border-box;
+
+  width: 200px;
+
+  border: 2px solid rgb(107, 114, 128);
+  border-radius: 10px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
   background: linear-gradient(
     to bottom right,
     rgb(55, 65, 81),
     rgb(17, 24, 39)
   );
-  border: 1px solid rgb(107, 114, 128);
-  border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.25rem;
-  width: fit-content;
-  min-width: 160px;
 `;
 
-export const StyledColorPickerButton = styled.button<{ color: COLORS }>`
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
+export const Button = styled.button<{ color: COLORS }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: scale(1);
-  transition-property: transform;
-  transition-duration: 100ms;
-  transition-timing-function: ease-out;
-  &:hover {
-    transform: scale(1.1);
-  }
 
-  background-color: ${(props) => {
-    switch (props.color) {
+  border: 1px solid transparent;
+
+  background-color: ${({ color }) => {
+    switch (color) {
       case COLORS.GREY:
         return "rgb(156, 163, 175)";
       case COLORS.BLACK:
@@ -65,26 +66,55 @@ export const StyledColorPickerButton = styled.button<{ color: COLORS }>`
         return "white";
     }
   }};
-  color: ${(props) => getContrastTextColor(props.color)};
-  ${(props) =>
-    props.color === COLORS.WHITE &&
-    `
-    border: 2px solid rgb(107, 114, 128);
-  `}
+
+  color: ${({ color }) => getContrastTextColor(color)};
+  ${({ color }) =>
+    color === COLORS.WHITE &&
+    css`
+      border: 2px solid rgb(107, 114, 128);
+    `}
+
+  &:hover {
+    border: 2px solid rgba(255, 255, 255, 0.526);
+    transform: scale(0.97);
+  }
+
+  transition: transform 0.1s ease-in-out, border-color 0.1s ease-in-out;
 `;
 
-export const StyledCloseButton = styled.button`
-  grid-column: span 4 / span 4;
-  background-color: rgb(75, 85, 99);
+export const CloseButton = styled.button`
+  min-width: 100%;
+  margin-top: 8px;
+
   color: white;
-  font-size: 0.75rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  border-radius: 0.375rem;
+  font-size: 12px;
+  padding: 8px 0px;
+  border-radius: 8px;
+  border: none;
+
+  background-color: rgb(75, 85, 99);
+  transform: scale(1);
+
   &:hover {
     background-color: rgb(55, 65, 81);
   }
-  transition-property: background-color;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  transition: background-color 0.15s ease-in-out, transform 0.15s ease-in-out;
+`;
+
+export const ModalBackground = styled.div`
+  position: fixed;
+  top: -100vh;
+  left: -100vw;
+  width: 1000vw;
+  height: 1000vh;
+  background-color: rgba(0, 0, 0, 00);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
 `;

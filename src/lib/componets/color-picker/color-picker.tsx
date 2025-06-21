@@ -1,9 +1,10 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { COLORS } from "../../constants";
 import {
-  StyledColorPickerContainer,
-  StyledColorPickerButton,
-  StyledCloseButton,
+  Container,
+  Button,
+  CloseButton,
+  ModalBackground,
 } from "./color-picker.styles";
 
 interface ColorPickerProps {
@@ -19,19 +20,22 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 }) => {
   const colorsArray = Object.values(COLORS);
   return (
-    <StyledColorPickerContainer style={position}>
-      {colorsArray.map((color) => (
-        <StyledColorPickerButton
-          key={color}
-          color={color}
-          onClick={() => onSelectColor(color)}
-          title={color}
-        >
-          {color.charAt(0)}
-        </StyledColorPickerButton>
-      ))}
-      <StyledCloseButton onClick={onClose}>Close</StyledCloseButton>
-    </StyledColorPickerContainer>
+    <Fragment>
+      <ModalBackground onClick={onClose} />
+      <Container style={position}>
+        {colorsArray.map((color) => (
+          <Button
+            key={color}
+            color={color}
+            onClick={() => onSelectColor(color)}
+            title={color}
+          >
+            {color.charAt(0)}
+          </Button>
+        ))}
+        <CloseButton onClick={onClose}>Close</CloseButton>
+      </Container>
+    </Fragment>
   );
 };
 
