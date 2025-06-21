@@ -6,21 +6,13 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import ColorPicker from "../../componets/color-picker/color-picker";
 import RealmCore from "../../componets/realm-core/realm-core";
 import Tile from "../../componets/tile/tile";
 import { COLORS, INITIAL_GRID, TARGET_REALM_COLORS } from "../../constants";
-import {
-  deepCopyGrid,
-  COORDS_TO_INDEX,
-  ALL_AROUND_COORDS_LOOKUP,
-  CROSS_AROUND_COORDS_LOOKUP,
-} from "../../utils/solver";
-import {
-  applyTileEffect,
-  rotateColorsInCoords,
-  invertColor,
-} from "../../utils/tiles";
+import { deepCopyGrid, solvePuzzleBFS } from "../../utils/solver";
+import { applyTileEffect } from "../../utils/tiles";
 import {
   StyledSolverOverlay,
   StyledSolverTile,
@@ -31,6 +23,11 @@ import {
   StyledButtonContainer,
   StyledButton,
   StyledMessageArea,
+  SolverStepsGrid,
+  LoadingSpinner,
+  SpinnerCircle,
+  SpinnerPath,
+  MessageText,
 } from "./solver.styles";
 
 interface SavedState {
@@ -56,7 +53,13 @@ interface ColorPickerState {
   position: { top: number; left: number };
 }
 
+interface SolverResult {
+  solution: SolutionStep[] | null;
+  iterations: number;
+}
+
 const Solver: React.FC = () => {
+  // State management
   const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
   const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
   const [solveOverlay, setSolveOverlay] = useState<boolean>(false);
@@ -64,6 +67,7 @@ const Solver: React.FC = () => {
   const [solving, setSolving] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [editingMode, setEditingMode] = useState<boolean>(false);
+  const [colorPicker, setColorPicker] = useState<ColorPickerState | null>(null);
 
   const [lastUserProvidedState, setLastUserProvidedState] =
     useState<SavedState>({
@@ -71,38 +75,69 @@ const Solver: React.FC = () => {
       realmColors: { ...TARGET_REALM_COLORS },
     });
 
-  const [colorPicker, setColorPicker] = useState<ColorPickerState | null>(null);
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
+  // Utility functions
+  const resetPuzzleState = useCallback(() => {
+    setSolveOverlay(false);
+    setSolutionSteps([]);
+    setMessage("");
+  }, []);
+
+  const updateLastUserState = useCallback(
+    (newGrid: COLORS[][], newRealmColors: typeof realmColors) => {
+      setLastUserProvidedState({
+        grid: deepCopyGrid(newGrid),
+        realmColors: { ...newRealmColors },
+      });
+    },
+    []
+  );
+
+  const calculateColorPickerPosition = useCallback(
+    (rect: DOMRect, puzzleRect: DOMRect): { top: number; left: number } => {
+      const pickerWidth = 160;
+      const pickerHeight = 150;
+
+      let left = rect.left - puzzleRect.left + rect.width / 2 - pickerWidth / 2;
+      let top = rect.top - puzzleRect.top + rect.height + 10;
+
+      // Horizontal bounds checking
+      if (left < 0) left = 0;
+      if (left + pickerWidth > puzzleRect.width) {
+        left = puzzleRect.width - pickerWidth;
+      }
+
+      // Vertical bounds checking
+      const potentialBottom = puzzleRect.top + top + pickerHeight;
+      if (
+        potentialBottom > window.innerHeight &&
+        top > rect.top - puzzleRect.top
+      ) {
+        top = rect.top - puzzleRect.top - pickerHeight - 10;
+      }
+
+      return { top, left };
+    },
+    []
+  );
+
+  // Event handlers
   const handleTileClick = useCallback(
     (row: number, col: number, event: React.MouseEvent<HTMLButtonElement>) => {
       if (editingMode) {
         const rect = event.currentTarget.getBoundingClientRect();
-        const puzzleRect = puzzleContainerRef.current!.getBoundingClientRect();
-        const pickerWidth = 160;
-        const pickerHeight = 150;
+        const puzzleRect = puzzleContainerRef.current?.getBoundingClientRect();
 
-        let left =
-          rect.left - puzzleRect.left + rect.width / 2 - pickerWidth / 2;
-        let top = rect.top - puzzleRect.top + rect.height + 10;
+        if (!puzzleRect) return;
 
-        if (left < 0) left = 0;
-        if (left + pickerWidth > puzzleRect.width)
-          left = puzzleRect.width - pickerWidth;
-
-        const potentialBottom = puzzleRect.top + top + 150;
-        if (
-          potentialBottom > window.innerHeight &&
-          top > rect.top - puzzleRect.top
-        ) {
-          top = rect.top - puzzleRect.top - 150 - 10;
-        }
+        const position = calculateColorPickerPosition(rect, puzzleRect);
 
         setColorPicker({
           type: "tile",
           row,
           col,
-          position: { top, left },
+          position,
         });
       } else {
         setGrid((prevGrid) => {
@@ -111,12 +146,10 @@ const Solver: React.FC = () => {
             tileColor === COLORS.BLUE ? prevGrid[1][1] : tileColor;
           return applyTileEffect(prevGrid, row, col, effectiveColor);
         });
-        setSolveOverlay(false);
-        setSolutionSteps([]);
-        setMessage("");
+        resetPuzzleState();
       }
     },
-    [editingMode, applyTileEffect]
+    [editingMode, calculateColorPickerPosition, resetPuzzleState]
   );
 
   const handleRealmCoreClick = useCallback(
@@ -124,92 +157,82 @@ const Solver: React.FC = () => {
       corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight",
       event: React.MouseEvent<HTMLDivElement>
     ) => {
-      let targetKey: keyof typeof TARGET_REALM_COLORS;
-
-      switch (corner) {
-        case "topLeft":
-          targetKey = "topLeft";
-          break;
-        case "topRight":
-          targetKey = "topRight";
-          break;
-        case "bottomLeft":
-          targetKey = "bottomLeft";
-          break;
-        case "bottomRight":
-          targetKey = "bottomRight";
-          break;
-        default:
-          return;
-      }
-
       if (editingMode) {
         const rect = event.currentTarget.getBoundingClientRect();
-        const puzzleRect = puzzleContainerRef.current!.getBoundingClientRect();
-        const pickerWidth = 160;
-        const pickerHeight = 150;
+        const puzzleRect = puzzleContainerRef.current?.getBoundingClientRect();
 
-        let left =
-          rect.left - puzzleRect.left + rect.width / 2 - pickerWidth / 2;
-        let top = rect.top - puzzleRect.top + rect.height + 10;
+        if (!puzzleRect) return;
 
-        if (left < 0) left = 0;
-        if (left + pickerWidth > puzzleRect.width)
-          left = puzzleRect.width - pickerWidth;
-
-        const potentialBottom = puzzleRect.top + top + 150;
-        if (
-          potentialBottom > window.innerHeight &&
-          top > rect.top - puzzleRect.top
-        ) {
-          top = rect.top - puzzleRect.top - 150 - 10;
-        }
+        const position = calculateColorPickerPosition(rect, puzzleRect);
 
         setColorPicker({
           type: "realm",
-          corner: targetKey,
-          position: { top, left },
+          corner,
+          position,
         });
       } else {
-        let adjacentRow: number, adjacentCol: number;
-        switch (corner) {
-          case "topLeft":
-            adjacentRow = 0;
-            adjacentCol = 0;
-            break;
-          case "topRight":
-            adjacentRow = 0;
-            adjacentCol = 2;
-            break;
-          case "bottomLeft":
-            adjacentRow = 2;
-            adjacentCol = 0;
-            break;
-          case "bottomRight":
-            adjacentRow = 2;
-            adjacentCol = 2;
-            break;
-        }
+        // Determine adjacent tile coordinates
+        const adjacentCoords = {
+          topLeft: { row: 0, col: 0 },
+          topRight: { row: 0, col: 2 },
+          bottomLeft: { row: 2, col: 0 },
+          bottomRight: { row: 2, col: 2 },
+        };
 
-        if (grid[adjacentRow!][adjacentCol!] !== realmColors[targetKey]) {
+        const { row: adjacentRow, col: adjacentCol } = adjacentCoords[corner];
+
+        if (grid[adjacentRow][adjacentCol] !== realmColors[corner]) {
+          // Reset puzzle to last saved state
           setGrid(deepCopyGrid(lastUserProvidedState.grid));
           setRealmColors({ ...lastUserProvidedState.realmColors });
           setMessage("Puzzle reset!");
-          setSolveOverlay(false);
-          setSolutionSteps([]);
+          resetPuzzleState();
         } else {
           setMessage(`Realm core ${corner} is matched!`);
         }
       }
     },
-    [grid, realmColors, editingMode, lastUserProvidedState]
+    [
+      grid,
+      realmColors,
+      editingMode,
+      lastUserProvidedState,
+      calculateColorPickerPosition,
+      resetPuzzleState,
+    ]
   );
 
-  const solvePuzzle = useCallback(() => {
+  const handleColorSelect = useCallback(
+    (color: COLORS) => {
+      if (!colorPicker) return;
+
+      if (
+        colorPicker.type === "tile" &&
+        colorPicker.row !== undefined &&
+        colorPicker.col !== undefined
+      ) {
+        const updatedGrid = deepCopyGrid(grid);
+        updatedGrid[colorPicker.row][colorPicker.col] = color;
+        setGrid(updatedGrid);
+        updateLastUserState(updatedGrid, realmColors);
+      } else if (colorPicker.type === "realm" && colorPicker.corner) {
+        const updatedRealmColors = { ...realmColors };
+        updatedRealmColors[
+          colorPicker.corner as keyof typeof updatedRealmColors
+        ] = color;
+        setRealmColors(updatedRealmColors);
+        updateLastUserState(grid, updatedRealmColors);
+      }
+
+      setColorPicker(null);
+      setMessage("Color updated!");
+    },
+    [colorPicker, grid, realmColors, updateLastUserState]
+  );
+
+  const solvePuzzle = useCallback(async () => {
     if (solveOverlay) {
-      setSolveOverlay(false);
-      setSolutionSteps([]);
-      setMessage("");
+      resetPuzzleState();
       return;
     }
 
@@ -217,237 +240,96 @@ const Solver: React.FC = () => {
     setMessage("Solving puzzle...");
     setSolutionSteps([]);
 
-    const maxIterations = 1000000;
+    try {
+      // Use setTimeout to allow UI to update before heavy computation
+      const result: SolverResult = await new Promise((resolve) => {
+        setTimeout(() => {
+          const solverResult = solvePuzzleBFS(grid, realmColors, 1000000);
+          resolve(solverResult);
+        }, 10);
+      });
 
-    const worker = new Worker(
-      URL.createObjectURL(
-        new Blob(
-          [
-            `
-      const COLORS = ${JSON.stringify(COLORS)};
-      const COORDS_TO_INDEX = ${JSON.stringify(COORDS_TO_INDEX)};
-      const ALL_AROUND_COORDS_LOOKUP = ${JSON.stringify(
-        ALL_AROUND_COORDS_LOOKUP
-      )};
-      const CROSS_AROUND_COORDS_LOOKUP = ${JSON.stringify(
-        CROSS_AROUND_COORDS_LOOKUP
-      )};
-
-      const deepCopyGrid = (grid) => grid.map(row => [...row]);
-      const stringifyGrid = (g) => JSON.stringify(g);
-      const rotateColorsInCoords = ${rotateColorsInCoords.toString()};
-      const invertColor = ${invertColor.toString()};
-      const applyTileEffect = (currentGrid, row, col, triggeredColor) => {
-          let newGrid = deepCopyGrid(currentGrid);
-          const tileColor = triggeredColor;
-          const clickedIndex = COORDS_TO_INDEX[\`\${row},\${col}\`];
-
-          switch (tileColor) {
-              case COLORS.GREY:
-                  break;
-              case COLORS.BLACK:
-                  const rowToRotate = newGrid[row];
-                  const lastTile = rowToRotate.pop();
-                  rowToRotate.unshift(lastTile);
-                  break;
-              case COLORS.GREEN:
-                  if (row === 1 && col === 1) {
-                      break;
-                  }
-                  const oppositeRow = 2 - row;
-                  const oppositeCol = 2 - col;
-                  [newGrid[row][col], newGrid[oppositeRow][oppositeCol]] =
-                      [newGrid[oppositeRow][oppositeCol], newGrid[row][col]];
-                  break;
-              case COLORS.PINK:
-                  const adjCoords = ALL_AROUND_COORDS_LOOKUP[clickedIndex];
-                  if (adjCoords && adjCoords.length > 0) {
-                      rotateColorsInCoords(newGrid, adjCoords);
-                  }
-                  break;
-              case COLORS.YELLOW:
-                  if (row > 0) {
-                      [newGrid[row][col], newGrid[row - 1][col]] =
-                          [newGrid[row - 1][col], newGrid[row][col]];
-                  }
-                  break;
-              case COLORS.VIOLET:
-                  if (row < 2) {
-                      [newGrid[row][col], newGrid[row + 1][col]] =
-                          [newGrid[row + 1][col], newGrid[row][col]];
-                  }
-                  break;
-              case COLORS.WHITE:
-                  const clickedOriginalColor = currentGrid[row][col];
-                  const crossAdjCoordsWhite = CROSS_AROUND_COORDS_LOOKUP[clickedIndex];
-                  newGrid[row][col] = invertColor(clickedOriginalColor, clickedOriginalColor, COLORS.GREY);
-                  if (crossAdjCoordsWhite) {
-                      crossAdjCoordsWhite.forEach(coord => {
-                          const adjOriginalColor = currentGrid[coord.r][coord.c];
-                          newGrid[coord.r][coord.c] = invertColor(adjOriginalColor, clickedOriginalColor, COLORS.GREY);
-                      });
-                  }
-                  break;
-              case COLORS.RED:
-                  for (let r = 0; r < 3; r++) {
-                      for (let c = 0; c < 3; c++) {
-                          if (newGrid[r][c] === COLORS.WHITE) {
-                              newGrid[r][c] = COLORS.BLACK;
-                          } else if (newGrid[r][c] === COLORS.BLACK) {
-                              newGrid[r][c] = COLORS.RED;
-                          }
-                      }
-                  }
-                  break;
-              case COLORS.ORANGE:
-                  const orangeCrossAdjCoords = CROSS_AROUND_COORDS_LOOKUP[clickedIndex];
-                  if (orangeCrossAdjCoords && orangeCrossAdjCoords.length > 0) {
-                      const colorCounts = {};
-                      orangeCrossAdjCoords.forEach(coord => {
-                          const adjColor = currentGrid[coord.r][coord.c];
-                          colorCounts[adjColor] = (colorCounts[adjColor] || 0) + 1;
-                      });
-                      let majorityColor = null;
-                      let maxCount = 0;
-                      let isStrictMajority = true;
-                      for (const color in colorCounts) {
-                          if (colorCounts[color] > maxCount) {
-                              maxCount = colorCounts[color];
-                              majorityColor = color;
-                              isStrictMajority = true;
-                          } else if (colorCounts[color] === maxCount) {
-                              isStrictMajority = false;
-                          }
-                      }
-                      if (isStrictMajority && majorityColor) {
-                          newGrid[row][col] = majorityColor;
-                      }
-                  }
-                  break;
-              case COLORS.BLUE:
-                  const centerTileColor = currentGrid[1][1];
-                  if (centerTileColor !== COLORS.BLUE) {
-                      newGrid = applyTileEffect(newGrid, row, col, centerTileColor);
-                  }
-                  break;
-              default:
-                  console.warn(\`Unknown tile color: \${tileColor} at (\${row}, \${col})\`);
-                  break;
-          }
-          return newGrid;
-      };
-      const isGoalReached = (currentGrid, realmColors) => {
-        return (
-          currentGrid[0][0] === realmColors.topLeft &&
-          currentGrid[0][2] === realmColors.topRight &&
-          currentGrid[2][0] === realmColors.bottomLeft &&
-          currentGrid[2][2] === realmColors.bottomRight
-        );
-      };
-      const CURRENT_REALM_COLORS = ${JSON.stringify(realmColors)};
-
-      self.onmessage = (e) => {
-        const { initialGrid, maxIterations } = e.data;
-        const queue = [[deepCopyGrid(initialGrid), []]];
-        const visited = new Set([stringifyGrid(initialGrid)]);
-        let iterations = 0;
-
-        while (queue.length > 0 && iterations < maxIterations) {
-          const [currentGrid, path] = queue.shift();
-          iterations++;
-
-          if (isGoalReached(currentGrid, CURRENT_REALM_COLORS)) {
-            self.postMessage({ solution: path, iterations });
-            return;
-          }
-
-          for (let r = 0; r < 3; r++) {
-            for (let c = 0; c < 3; c++) {
-              const tileColor = currentGrid[r][c];
-              const effectiveColor = tileColor === COLORS.BLUE ? currentGrid[1][1] : tileColor;
-              
-              if (tileColor === COLORS.BLUE && currentGrid[1][1] === COLORS.BLUE) {
-                 continue;
-              }
-
-              const nextGrid = applyTileEffect(deepCopyGrid(currentGrid), r, c, effectiveColor);
-              const nextGridString = stringifyGrid(nextGrid);
-
-              if (!visited.has(nextGridString)) {
-                visited.add(nextGridString);
-                queue.push([nextGrid, [...path, { r, c }]]);
-              }
-            }
-          }
-        }
-        self.postMessage({ solution: null, iterations });
-      };
-    `,
-          ],
-          { type: "application/javascript" }
-        )
-      )
-    );
-
-    worker.postMessage({ initialGrid: grid, maxIterations: maxIterations });
-
-    worker.onmessage = (e) => {
-      const { solution, iterations } = e.data;
       setSolving(false);
-      if (solution) {
-        setSolutionSteps(solution);
+
+      if (result.solution) {
+        setSolutionSteps(result.solution);
         setSolveOverlay(true);
         setMessage(
-          `Solution found in ${solution.length} steps after ${iterations} iterations!`
+          `Solution found in ${result.solution.length} steps after ${result.iterations} iterations!`
         );
       } else {
         setMessage(
           "No solution found within the iteration limit. Try a different puzzle configuration or reset!"
         );
       }
-      worker.terminate();
-    };
-
-    worker.onerror = (e) => {
+    } catch (error) {
       setSolving(false);
       setMessage("An error occurred during solving.");
-      console.error("Worker error:", e);
-      worker.terminate();
-    };
-  }, [grid, realmColors]);
+      console.error("Solver error:", error);
+    }
+  }, [grid, realmColors, solveOverlay, resetPuzzleState]);
 
+  const handleReset = useCallback(() => {
+    setGrid(deepCopyGrid(lastUserProvidedState.grid));
+    setRealmColors({ ...lastUserProvidedState.realmColors });
+    setMessage("Puzzle reset to last saved state!");
+    resetPuzzleState();
+    setSolving(false);
+  }, [lastUserProvidedState, resetPuzzleState]);
+
+  const handleClearAll = useCallback(() => {
+    const emptyGrid = Array(3)
+      .fill(null)
+      .map(() => Array(3).fill(COLORS.GREY));
+    const emptyRealmColors = {
+      topLeft: COLORS.GREY,
+      topRight: COLORS.GREY,
+      bottomLeft: COLORS.GREY,
+      bottomRight: COLORS.GREY,
+    };
+
+    setGrid(emptyGrid);
+    setRealmColors(emptyRealmColors);
+    setMessage("Board and target colors cleared to Grey!");
+    resetPuzzleState();
+    setSolving(false);
+  }, [resetPuzzleState]);
+
+  const toggleEditingMode = useCallback(() => {
+    setEditingMode((prev) => !prev);
+  }, []);
+
+  // Effects
   useEffect(() => {
     if (!editingMode) {
-      // Removed setLastUserProvidedState from here
       setMessage("Puzzle configuration saved.");
     } else {
       setMessage("Editing mode active.");
     }
-    setSolveOverlay(false);
-    setSolutionSteps([]);
-  }, [editingMode]); // Simplified dependencies
+    resetPuzzleState();
+  }, [editingMode, resetPuzzleState]);
 
   useEffect(() => {
-    document.body.classList.add(
-      "bg-gray-100",
-      "font-sans",
-      "flex",
-      "items-center",
-      "justify-center",
-      "min-h-screen"
-    );
+    // Apply body styles using styled-components approach
+    const originalBodyStyle = document.body.style.cssText;
+
+    Object.assign(document.body.style, {
+      backgroundColor: "#f3f4f6",
+      fontFamily: "system-ui, -apple-system, sans-serif",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      margin: "0",
+      padding: "0",
+    });
+
     return () => {
-      document.body.classList.remove(
-        "bg-gray-100",
-        "font-sans",
-        "flex",
-        "items-center",
-        "justify-center",
-        "min-h-screen"
-      );
+      document.body.style.cssText = originalBodyStyle;
     };
   }, []);
 
+  // Memoized components
   const solverStepsDisplay = useMemo(() => {
     if (!solveOverlay || solutionSteps.length === 0) return null;
 
@@ -462,26 +344,14 @@ const Solver: React.FC = () => {
 
     return (
       <StyledSolverOverlay>
-        <div className="grid grid-cols-3 gap-4 p-6 w-full h-full">
+        <SolverStepsGrid>
           {Array.from({ length: 3 }).map((_, r) =>
             Array.from({ length: 3 }).map((__, c) => {
               const key = `${r},${c}`;
               const steps = stepMap.get(key);
-              const tileColor = grid[r][c];
-              const textColor =
-                tileColor === COLORS.BLACK ||
-                tileColor === COLORS.GREEN ||
-                tileColor === COLORS.PINK ||
-                tileColor === COLORS.VIOLET ||
-                tileColor === COLORS.RED ||
-                tileColor === COLORS.ORANGE ||
-                tileColor === COLORS.BLUE ||
-                tileColor === COLORS.GREY
-                  ? "text-white"
-                  : "text-gray-800";
 
               return (
-                <StyledSolverTile key={`${r}-${c}`} className={textColor}>
+                <StyledSolverTile key={`${r}-${c}`}>
                   {steps && (
                     <div>
                       {steps.length === 1 ? `${steps[0]}` : steps.join(", ")}
@@ -491,37 +361,26 @@ const Solver: React.FC = () => {
               );
             })
           )}
-        </div>
+        </SolverStepsGrid>
       </StyledSolverOverlay>
     );
   }, [solveOverlay, solutionSteps, grid]);
 
-  const handleColorSelect = useCallback(
-    (color: COLORS) => {
-      if (!colorPicker) return;
-
-      let updatedGrid = deepCopyGrid(grid);
-      let updatedRealmColors = { ...realmColors };
-
-      if (colorPicker.type === "tile") {
-        updatedGrid[colorPicker.row!][colorPicker.col!] = color;
-        setGrid(updatedGrid);
-      } else if (colorPicker.type === "realm") {
-        updatedRealmColors[colorPicker.corner!] = color;
-        setRealmColors(updatedRealmColors);
-      }
-
-      // Update lastUserProvidedState only when an actual color edit happens
-      setLastUserProvidedState({
-        grid: deepCopyGrid(updatedGrid),
-        realmColors: { ...updatedRealmColors },
-      });
-
-      setColorPicker(null);
-      setMessage("Color updated!");
-    },
-    [colorPicker, grid, realmColors]
-  ); // Keep grid and realmColors as dependencies for current state access
+  const loadingSpinner = (
+    <LoadingSpinner>
+      <SpinnerCircle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <SpinnerPath
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </LoadingSpinner>
+  );
 
   return (
     <StyledAppContainer>
@@ -555,96 +414,66 @@ const Solver: React.FC = () => {
               <Tile
                 key={`${rIdx}-${cIdx}`}
                 color={color}
-                editingMode={editingMode}
+                isEditingMode={editingMode}
                 onClick={(e) => handleTileClick(rIdx, cIdx, e)}
               />
             ))
           )}
         </StyledGridContainer>
+
         {solverStepsDisplay}
-        {colorPicker && (
-          <ColorPicker
-            onSelectColor={handleColorSelect}
-            onClose={() => setColorPicker(null)}
-            position={colorPicker.position}
-          />
-        )}
+
+        <AnimatePresence mode="wait">
+          {colorPicker && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <ColorPicker
+                onSelectColor={handleColorSelect}
+                onClose={() => setColorPicker(null)}
+                position={colorPicker.position}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </StyledPuzzleContainer>
 
       <StyledButtonContainer>
         <StyledButton
-          className={editingMode ? "edit-mode-active" : "edit-mode-inactive"}
-          onClick={() => setEditingMode((prev) => !prev)}
+          $variant="edit"
+          $isActive={editingMode}
+          onClick={toggleEditingMode}
         >
           {editingMode ? "Exit Edit Mode" : "Edit puzzle"}
         </StyledButton>
 
         <StyledButton
-          className="show-solution"
+          $variant="solve"
           onClick={solvePuzzle}
           disabled={solving || editingMode}
         >
-          {solving ? (
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-          ) : solveOverlay ? (
-            "Hide solution"
-          ) : (
-            "Show solution"
-          )}
+          {solving
+            ? "Solving..."
+            : solveOverlay
+            ? "Hide solution"
+            : "Show solution"}
         </StyledButton>
 
         <StyledButton
-          className="reset"
-          onClick={() => {
-            setGrid(deepCopyGrid(lastUserProvidedState.grid));
-            setRealmColors({ ...lastUserProvidedState.realmColors });
-            setMessage("Puzzle reset to last saved state!");
-            setSolveOverlay(false);
-            setSolutionSteps([]);
-            setSolving(false);
-          }}
+          $variant="reset"
+          disabled={editingMode || solving}
+          onClick={handleReset}
         >
           Reset
         </StyledButton>
 
         <StyledButton
-          className="clear-all"
-          onClick={() => {
-            setGrid(
-              Array(3)
-                .fill(null)
-                .map(() => Array(3).fill(COLORS.GREY))
-            );
-            setRealmColors({
-              topLeft: COLORS.GREY,
-              topRight: COLORS.GREY,
-              bottomLeft: COLORS.GREY,
-              bottomRight: COLORS.GREY,
-            });
-            setMessage("Board and target colors cleared to Grey!");
-            setSolveOverlay(false);
-            setSolutionSteps([]);
-            setSolving(false);
-          }}
+          $variant="clear"
+          disabled={editingMode || solving}
+          onClick={handleClearAll}
         >
           Clear All to Grey
         </StyledButton>
@@ -652,9 +481,9 @@ const Solver: React.FC = () => {
 
       <StyledMessageArea>
         {message && (
-          <p className={solutionSteps.length > 0 ? "success" : "error"}>
+          <MessageText $isSuccess={solutionSteps.length > 0}>
             {message}
-          </p>
+          </MessageText>
         )}
       </StyledMessageArea>
     </StyledAppContainer>
