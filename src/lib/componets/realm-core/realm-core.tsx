@@ -1,6 +1,7 @@
 import React from "react";
-import { StyledRealmCore } from "./realm-core.styles";
+import { Container, RealmIconWrapper } from "./realm-core.styles";
 import { COLORS, REALM_SHAPES } from "../../constants";
+import { Black } from "../realms/black";
 
 interface RealmCoreProps {
   corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
@@ -14,14 +15,14 @@ const RealmCore: React.FC<RealmCoreProps> = ({
   onClick,
 }) => {
   return (
-    <StyledRealmCore
+    <Container
       corner={corner}
       onClick={onClick}
       title={`Target: ${targetColor}`}
     >
-      {REALM_SHAPES[targetColor]}
-      <span>{targetColor}</span>
-    </StyledRealmCore>
+      {/* <Black /> */}
+      <RealmIconWrapper>{REALM_SHAPES[targetColor]}</RealmIconWrapper>
+    </Container>
   );
 };
 

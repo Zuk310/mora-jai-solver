@@ -1,9 +1,10 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-export const StyledRealmCore = styled.div<{
+export const Container = styled.div<{
   corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 }>`
   position: absolute;
+  z-index: 10;
   width: 5rem;
   height: 5rem;
   background-color: rgb(120, 53, 15);
@@ -26,19 +27,39 @@ export const StyledRealmCore = styled.div<{
     transform: scale(1.05);
   }
 
-  span {
-    position: absolute;
-    font-size: 0.75rem;
-    bottom: 0.25rem;
-    font-weight: 400;
-    color: rgb(253, 224, 71);
-  }
-
   ${(props) => {
-    if (props.corner === "topLeft") return `top: -24px; left: -24px;`;
-    if (props.corner === "topRight") return `top: -24px; right: -24px;`;
-    if (props.corner === "bottomLeft") return `bottom: -24px; left: -24px;`;
-    if (props.corner === "bottomRight") return `bottom: -24px; right: -24px;`;
+    if (props.corner === "topLeft")
+      return css`
+        top: -24px;
+        left: -24px;
+        rotate: -45deg;
+      `;
+    if (props.corner === "topRight")
+      return css`
+        top: -24px;
+        right: -24px;
+        rotate: 45deg;
+      `;
+    if (props.corner === "bottomLeft")
+      return css`
+        bottom: -24px;
+        left: -24px;
+        rotate: 45deg;
+      `;
+    if (props.corner === "bottomRight")
+      return css`
+        bottom: -24px;
+        right: -24px;
+        rotate: -45deg;
+      `;
     return "";
   }}
+`;
+
+export const RealmIconWrapper = styled.div`
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;

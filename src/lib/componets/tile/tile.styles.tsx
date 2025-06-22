@@ -69,7 +69,7 @@ export const StyledTile = styled.button<{
   }
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.75);
+    box-shadow: 0 0 0 4px rgba(171, 171, 171, 0.426);
   }
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);

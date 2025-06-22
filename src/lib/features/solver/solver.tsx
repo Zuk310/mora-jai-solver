@@ -1,12 +1,7 @@
 "use client";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
+import SolutionOverlay from "@mora-jai/lib/componets/solution-overlay/solution-overlay";
 import { AnimatePresence, motion } from "motion/react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ColorPicker from "../../componets/color-picker/color-picker";
 import RealmCore from "../../componets/realm-core/realm-core";
 import Tile from "../../componets/tile/tile";
@@ -14,20 +9,24 @@ import { COLORS, INITIAL_GRID, TARGET_REALM_COLORS } from "../../constants";
 import { deepCopyGrid, solvePuzzleBFS } from "../../utils/solver";
 import { applyTileEffect } from "../../utils/tiles";
 import {
-  StyledSolverOverlay,
-  StyledSolverTile,
-  StyledAppContainer,
-  StyledTitle,
-  StyledPuzzleContainer,
-  StyledGridContainer,
-  StyledButtonContainer,
-  StyledButton,
-  StyledMessageArea,
-  SolverStepsGrid,
-  LoadingSpinner,
-  SpinnerCircle,
-  SpinnerPath,
+  ButtonContainer,
+  Container,
+  ControlsMessage,
+  GridContainer,
+  GuideContainer,
+  GuideList,
+  GuideListContainer,
+  GuideListItem,
+  GuideListTitle,
+  GuideText,
+  MessageArea,
   MessageText,
+  PuzzleContainer,
+  SideContainer,
+  StyledButton,
+  Subtitle,
+  Title,
+  Wrapper,
 } from "./solver.styles";
 
 interface SavedState {
@@ -59,13 +58,18 @@ interface SolverResult {
 }
 
 const Solver: React.FC = () => {
-  // State management
+  const loadRef = useRef<boolean>(false);
+
   const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
   const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
   const [solveOverlay, setSolveOverlay] = useState<boolean>(false);
   const [solutionSteps, setSolutionSteps] = useState<SolutionStep[]>([]);
   const [solving, setSolving] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
+  const [message, setMessage] = useState<{
+    msg: string;
+    status: "good" | "bad" | "info";
+    visible: boolean;
+  }>({ msg: "", status: "info", visible: false });
   const [editingMode, setEditingMode] = useState<boolean>(false);
   const [colorPicker, setColorPicker] = useState<ColorPickerState | null>(null);
 
@@ -80,8 +84,9 @@ const Solver: React.FC = () => {
   // Utility functions
   const resetPuzzleState = useCallback(() => {
     setSolveOverlay(false);
-    setSolutionSteps([]);
-    setMessage("");
+    setTimeout(() => {
+      setSolutionSteps([]);
+    }, 100);
   }, []);
 
   const updateLastUserState = useCallback(
@@ -185,10 +190,14 @@ const Solver: React.FC = () => {
           // Reset puzzle to last saved state
           setGrid(deepCopyGrid(lastUserProvidedState.grid));
           setRealmColors({ ...lastUserProvidedState.realmColors });
-          setMessage("Puzzle reset!");
+          setMessage({ msg: "Puzzle reset!", status: "info", visible: true });
           resetPuzzleState();
         } else {
-          setMessage(`Realm core ${corner} is matched!`);
+          setMessage({
+            msg: "Realm core is matched!",
+            status: "good",
+            visible: true,
+          });
         }
       }
     },
@@ -225,7 +234,7 @@ const Solver: React.FC = () => {
       }
 
       setColorPicker(null);
-      setMessage("Color updated!");
+      setMessage({ msg: "Color updated!", status: "info", visible: true });
     },
     [colorPicker, grid, realmColors, updateLastUserState]
   );
@@ -237,7 +246,7 @@ const Solver: React.FC = () => {
     }
 
     setSolving(true);
-    setMessage("Solving puzzle...");
+    setMessage({ msg: "Solving puzzle...", status: "info", visible: true });
     setSolutionSteps([]);
 
     try {
@@ -254,17 +263,25 @@ const Solver: React.FC = () => {
       if (result.solution) {
         setSolutionSteps(result.solution);
         setSolveOverlay(true);
-        setMessage(
-          `Solution found in ${result.solution.length} steps after ${result.iterations} iterations!`
-        );
+        setMessage({
+          msg: `Solution found in ${result.solution.length} steps after ${result.iterations} iterations!`,
+          status: "good",
+          visible: true,
+        });
       } else {
-        setMessage(
-          "No solution found within the iteration limit. Try a different puzzle configuration or reset!"
-        );
+        setMessage({
+          msg: "No solution found within the iteration limit. Try a different puzzle configuration or reset!",
+          status: "bad",
+          visible: true,
+        });
       }
     } catch (error) {
       setSolving(false);
-      setMessage("An error occurred during solving.");
+      setMessage({
+        msg: "An error occurred during solving.",
+        status: "bad",
+        visible: true,
+      });
       console.error("Solver error:", error);
     }
   }, [grid, realmColors, solveOverlay, resetPuzzleState]);
@@ -272,7 +289,11 @@ const Solver: React.FC = () => {
   const handleReset = useCallback(() => {
     setGrid(deepCopyGrid(lastUserProvidedState.grid));
     setRealmColors({ ...lastUserProvidedState.realmColors });
-    setMessage("Puzzle reset to last saved state!");
+    setMessage({
+      msg: "Puzzle reset to last saved state!",
+      status: "info",
+      visible: true,
+    });
     resetPuzzleState();
     setSolving(false);
   }, [lastUserProvidedState, resetPuzzleState]);
@@ -290,7 +311,11 @@ const Solver: React.FC = () => {
 
     setGrid(emptyGrid);
     setRealmColors(emptyRealmColors);
-    setMessage("Board and target colors cleared to Grey!");
+    setMessage({
+      msg: "Board and target colors cleared to Grey!",
+      status: "info",
+      visible: true,
+    });
     resetPuzzleState();
     setSolving(false);
   }, [resetPuzzleState]);
@@ -301,192 +326,204 @@ const Solver: React.FC = () => {
 
   // Effects
   useEffect(() => {
+    if (!loadRef.current) return;
     if (!editingMode) {
-      setMessage("Puzzle configuration saved.");
+      setMessage({
+        msg: "Puzzle configuration saved.",
+        status: "info",
+        visible: true,
+      });
     } else {
-      setMessage("Editing mode active.");
+      setMessage({
+        msg: "Editing mode active.",
+        status: "info",
+        visible: true,
+      });
     }
     resetPuzzleState();
   }, [editingMode, resetPuzzleState]);
 
   useEffect(() => {
-    // Apply body styles using styled-components approach
-    const originalBodyStyle = document.body.style.cssText;
-
-    Object.assign(document.body.style, {
-      backgroundColor: "#f3f4f6",
-      fontFamily: "system-ui, -apple-system, sans-serif",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "100vh",
-      margin: "0",
-      padding: "0",
-    });
-
-    return () => {
-      document.body.style.cssText = originalBodyStyle;
-    };
+    loadRef.current = true;
   }, []);
 
-  // Memoized components
-  const solverStepsDisplay = useMemo(() => {
-    if (!solveOverlay || solutionSteps.length === 0) return null;
+  useEffect(() => {
+    if (message.visible) {
+      const timer = setTimeout(() => {
+        setMessage((prev) => ({ ...prev, visible: false }));
+      }, 3000);
 
-    const stepMap = new Map<string, number[]>();
-    solutionSteps.forEach((step, index) => {
-      const key = `${step.r},${step.c}`;
-      if (!stepMap.has(key)) {
-        stepMap.set(key, []);
-      }
-      stepMap.get(key)!.push(index + 1);
-    });
-
-    return (
-      <StyledSolverOverlay>
-        <SolverStepsGrid>
-          {Array.from({ length: 3 }).map((_, r) =>
-            Array.from({ length: 3 }).map((__, c) => {
-              const key = `${r},${c}`;
-              const steps = stepMap.get(key);
-
-              return (
-                <StyledSolverTile key={`${r}-${c}`}>
-                  {steps && (
-                    <div>
-                      {steps.length === 1 ? `${steps[0]}` : steps.join(", ")}
-                    </div>
-                  )}
-                </StyledSolverTile>
-              );
-            })
-          )}
-        </SolverStepsGrid>
-      </StyledSolverOverlay>
-    );
-  }, [solveOverlay, solutionSteps, grid]);
-
-  const loadingSpinner = (
-    <LoadingSpinner>
-      <SpinnerCircle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <SpinnerPath
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      />
-    </LoadingSpinner>
-  );
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   return (
-    <StyledAppContainer>
-      <StyledTitle>Mora Jai Puzzle Solver</StyledTitle>
+    <Wrapper>
+      <Title>Mora Jai Puzzle Solver</Title>
+      <Container>
+        <SideContainer>
+          <GuideContainer>
+            <Subtitle>Guide</Subtitle>
+            <GuideText>
+              The objective of the Mora Jai Puzzle is to match the colors of the
+              four corner tiles on the 3x3 grid with their respective "Realm
+              Cores." You achieve this by clicking on tiles, which triggers
+              unique effects based on their color, changing the grid.
+            </GuideText>
+          </GuideContainer>
+          <GuideListContainer>
+            <GuideListTitle>Colors Mechanics:</GuideListTitle>
+            <GuideList>
+              <GuideListItem>
+                <b>Grey:</b> Does nothing.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Black:</b> Shifts its row left.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Green:</b> Swaps with the opposite tile.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Pink:</b> Rotates its 8 neighbors clockwise.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Yellow:</b> Swaps with the tile above.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Violet:</b> Swaps with the tile below.
+              </GuideListItem>
+              <GuideListItem>
+                <b>White:</b> Turns itself and 4 cross neighbors to Grey.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Red:</b> White becomes Black; Black becomes Red.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Orange:</b> Becomes the majority color of its 4 cross
+                neighbors.
+              </GuideListItem>
+              <GuideListItem>
+                <b>Blue:</b> Triggers the effect of the center tile.
+              </GuideListItem>
+            </GuideList>
+          </GuideListContainer>
+        </SideContainer>
+        <PuzzleContainer ref={puzzleContainerRef}>
+          <RealmCore
+            corner="topLeft"
+            targetColor={realmColors.topLeft}
+            onClick={(e) => handleRealmCoreClick("topLeft", e)}
+          />
+          <RealmCore
+            corner="topRight"
+            targetColor={realmColors.topRight}
+            onClick={(e) => handleRealmCoreClick("topRight", e)}
+          />
+          <RealmCore
+            corner="bottomLeft"
+            targetColor={realmColors.bottomLeft}
+            onClick={(e) => handleRealmCoreClick("bottomLeft", e)}
+          />
+          <RealmCore
+            corner="bottomRight"
+            targetColor={realmColors.bottomRight}
+            onClick={(e) => handleRealmCoreClick("bottomRight", e)}
+          />
 
-      <StyledPuzzleContainer ref={puzzleContainerRef}>
-        <RealmCore
-          corner="topLeft"
-          targetColor={realmColors.topLeft}
-          onClick={(e) => handleRealmCoreClick("topLeft", e)}
-        />
-        <RealmCore
-          corner="topRight"
-          targetColor={realmColors.topRight}
-          onClick={(e) => handleRealmCoreClick("topRight", e)}
-        />
-        <RealmCore
-          corner="bottomLeft"
-          targetColor={realmColors.bottomLeft}
-          onClick={(e) => handleRealmCoreClick("bottomLeft", e)}
-        />
-        <RealmCore
-          corner="bottomRight"
-          targetColor={realmColors.bottomRight}
-          onClick={(e) => handleRealmCoreClick("bottomRight", e)}
-        />
+          <GridContainer>
+            {grid.map((row, rIdx) =>
+              row.map((color, cIdx) => (
+                <Tile
+                  key={`${rIdx}-${cIdx}`}
+                  color={color}
+                  isEditingMode={editingMode}
+                  onClick={(e) => handleTileClick(rIdx, cIdx, e)}
+                />
+              ))
+            )}
+          </GridContainer>
 
-        <StyledGridContainer>
-          {grid.map((row, rIdx) =>
-            row.map((color, cIdx) => (
-              <Tile
-                key={`${rIdx}-${cIdx}`}
-                color={color}
-                isEditingMode={editingMode}
-                onClick={(e) => handleTileClick(rIdx, cIdx, e)}
-              />
-            ))
-          )}
-        </StyledGridContainer>
+          <SolutionOverlay
+            solutionSteps={solutionSteps}
+            isVisible={solveOverlay}
+          />
 
-        {solverStepsDisplay}
+          <AnimatePresence mode="wait">
+            {colorPicker && (
+              <motion.div
+                key={"color-picker"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+              >
+                <ColorPicker
+                  onSelectColor={handleColorSelect}
+                  onClose={() => setColorPicker(null)}
+                  position={colorPicker.position}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </PuzzleContainer>
 
-        <AnimatePresence mode="wait">
-          {colorPicker && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+        <SideContainer>
+          <Subtitle>Puzzle Controls</Subtitle>
+          <ControlsMessage>
+            Use the controls below to <b>edit</b> the puzzle, <b>solve</b> it,{" "}
+            <b>reset it to last edit</b> or <b>clear all</b> tiles.
+          </ControlsMessage>
+          <ButtonContainer>
+            <StyledButton
+              $variant="edit"
+              $isActive={editingMode}
+              onClick={toggleEditingMode}
             >
-              <ColorPicker
-                onSelectColor={handleColorSelect}
-                onClose={() => setColorPicker(null)}
-                position={colorPicker.position}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </StyledPuzzleContainer>
-
-      <StyledButtonContainer>
-        <StyledButton
-          $variant="edit"
-          $isActive={editingMode}
-          onClick={toggleEditingMode}
-        >
-          {editingMode ? "Exit Edit Mode" : "Edit puzzle"}
-        </StyledButton>
-
-        <StyledButton
-          $variant="solve"
-          onClick={solvePuzzle}
-          disabled={solving || editingMode}
-        >
-          {solving
-            ? "Solving..."
-            : solveOverlay
-            ? "Hide solution"
-            : "Show solution"}
-        </StyledButton>
-
-        <StyledButton
-          $variant="reset"
-          disabled={editingMode || solving}
-          onClick={handleReset}
-        >
-          Reset
-        </StyledButton>
-
-        <StyledButton
-          $variant="clear"
-          disabled={editingMode || solving}
-          onClick={handleClearAll}
-        >
-          Clear All to Grey
-        </StyledButton>
-      </StyledButtonContainer>
-
-      <StyledMessageArea>
-        {message && (
-          <MessageText $isSuccess={solutionSteps.length > 0}>
-            {message}
-          </MessageText>
-        )}
-      </StyledMessageArea>
-    </StyledAppContainer>
+              {editingMode ? "Exit Edit Mode" : "Edit puzzle"}
+            </StyledButton>
+            <StyledButton
+              $variant="solve"
+              onClick={solvePuzzle}
+              disabled={solving || editingMode}
+            >
+              {solving
+                ? "Solving..."
+                : solveOverlay
+                ? "Hide solution"
+                : "Show solution"}
+            </StyledButton>
+            <StyledButton
+              $variant="reset"
+              disabled={editingMode || solving}
+              onClick={handleReset}
+            >
+              Reset
+            </StyledButton>
+            <StyledButton
+              $variant="clear"
+              disabled={editingMode || solving}
+              onClick={handleClearAll}
+            >
+              Clear All
+            </StyledButton>
+          </ButtonContainer>
+        </SideContainer>
+      </Container>
+      <AnimatePresence mode="sync">
+        <MessageArea>
+          <motion.div
+            key="message"
+            initial={{ opacity: 0, y: -10 }}
+            animate={
+              message.visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }
+            }
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <MessageText status={message.status}>{message.msg}</MessageText>
+          </motion.div>
+        </MessageArea>
+      </AnimatePresence>
+    </Wrapper>
   );
 };
 
