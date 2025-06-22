@@ -4,7 +4,7 @@ import Solver from "../lib/features/solver/solver";
 
 export default function IndexPage() {
   const router = useRouter();
-  const basePath = router.basePath;
+  const basePath = router.basePath || "";
 
   return (
     <>
@@ -22,7 +22,7 @@ export default function IndexPage() {
         <meta name="author" content="Zuk" />
         <meta name="theme-color" content="#121212" />
 
-        {/* Favicon Links - Prefixed with the router's basePath */}
+        {/* Favicon Links with correct basePath */}
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -41,8 +41,9 @@ export default function IndexPage() {
           href={`${basePath}/favicon-16x16.png`}
         />
         <link rel="manifest" href={`${basePath}/site.webmanifest`} />
+        <link rel="icon" href={`${basePath}/favicon.ico`} />
 
-        {/* Social media links remain as absolute URLs */}
+        {/* Social media links require the full absolute URL */}
         <meta property="og:type" content="website" />
         <meta
           property="og:url"
