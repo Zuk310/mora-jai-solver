@@ -19,13 +19,18 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+            },
+          },
+        ],
+        as: "*.js",
       },
     },
   },
