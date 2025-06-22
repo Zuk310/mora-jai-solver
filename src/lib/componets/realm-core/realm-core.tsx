@@ -5,12 +5,14 @@ import { COLORS } from "../../constants";
 interface RealmCoreProps {
   corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
   targetColor: COLORS;
+  isEditingMode?: boolean;
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const RealmCore: React.FC<RealmCoreProps> = ({
   corner,
   targetColor,
+  isEditingMode = false,
   onClick,
 }) => {
   return (
@@ -19,7 +21,7 @@ const RealmCore: React.FC<RealmCoreProps> = ({
       onClick={onClick}
       title={`Target: ${targetColor}`}
     >
-      <InnerCircle color={targetColor} />
+      <InnerCircle color={targetColor} $isEditingMode={isEditingMode} />
     </Container>
   );
 };

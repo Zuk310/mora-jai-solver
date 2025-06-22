@@ -1,7 +1,16 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 const Z_INDEX_PUZZLE = 10;
 const FONT_STACK_SYSTEM = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+`;
 
 const getButtonStyles = (variant?: string, isActive?: boolean) => {
   const baseStyles = css`
@@ -117,7 +126,7 @@ export const Title = styled.h1`
   letter-spacing: -0.025em;
 `;
 
-export const PuzzleContainer = styled.div`
+export const PuzzleContainer = styled.div<{ $isSolving?: boolean }>`
   position: relative;
   z-index: ${Z_INDEX_PUZZLE};
 
@@ -136,7 +145,11 @@ export const PuzzleContainer = styled.div`
     border-color: rgba(255, 255, 255, 0.2);
   }
 
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  opacity: ${({ $isSolving }) => ($isSolving ? 0.5 : 1)};
+  pointer-events: ${({ $isSolving }) => ($isSolving ? "none" : "auto")};
+  transition: opacity 0.2s ease;
+
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 `;
 
 export const GridContainer = styled.div`
@@ -187,7 +200,7 @@ export const InfoGroup = styled.div`
     border-color 0.2s ease-out;
 `;
 
-export const CenterColumn = styled.div`
+export const CenterColumn = styled.div<{ $isSolving?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -272,7 +285,10 @@ export const ControlsMessage = styled.span`
   line-height: 1.5;
 `;
 
-export const MessageText = styled.p<{ $status: "good" | "bad" | "info" }>`
+export const MessageText = styled.p<{
+  $status: "good" | "bad" | "info";
+  $isSolving?: boolean;
+}>`
   margin: 0;
   padding: 10px 20px;
 
@@ -283,6 +299,14 @@ export const MessageText = styled.p<{ $status: "good" | "bad" | "info" }>`
 
   border: 1px solid transparent;
   border-radius: 8px;
+
+  animation: ${({ $isSolving }) => {
+    return $isSolving
+      ? css`
+          ${pulse} 2s infinite ease-in-out
+        `
+      : "none";
+  }};
 
   ${({ $status }) => {
     if ($status === "good")
