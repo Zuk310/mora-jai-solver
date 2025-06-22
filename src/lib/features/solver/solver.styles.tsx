@@ -87,7 +87,10 @@ export const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+
+  padding-top: 5vh;
+  box-sizing: border-box;
 
   background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
   font-family: ${FONT_STACK_SYSTEM};
@@ -105,7 +108,7 @@ export const Container = styled.div`
 `;
 
 export const Title = styled.h1`
-  margin-bottom: 24px;
+  margin-bottom: 90px;
 
   font-size: 36px;
   font-weight: 700;
