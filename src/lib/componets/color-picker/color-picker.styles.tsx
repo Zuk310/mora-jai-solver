@@ -2,43 +2,43 @@ import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
-const PICKER_WIDTH = "200px";
+const PICKER_WIDTH = "220px";
 const BUTTON_SIZE = "40px";
 const BUTTON_BORDER_RADIUS = "8px";
-const GAP_SIZE = "5px";
+const GAP_SIZE = "8px";
+const FONT_STACK_SYSTEM = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
 
 export const Container = styled.div`
   position: absolute;
   z-index: 50;
+
   display: flex;
   flex-wrap: wrap;
   gap: ${GAP_SIZE};
 
   width: ${PICKER_WIDTH};
-  padding: 10px;
+  padding: 12px;
   box-sizing: border-box;
 
-  background: linear-gradient(
-    to bottom right,
-    rgb(55, 65, 81),
-    rgb(17, 24, 39)
-  );
-  border: 2px solid rgb(107, 114, 128);
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(145deg, #2c2c2e, #1a1a1c);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.3);
 `;
 
 export const Button = styled.button<{ color: COLORS }>`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  width: ${BUTTON_SIZE};
-  height: ${BUTTON_SIZE};
-
-  font-size: 14px;
-  font-weight: 600;
-  color: ${({ color }) => getContrastTextColor(color)};
+  border: 1px solid transparent;
 
   background-color: ${({ color }) => {
     switch (color) {
@@ -67,17 +67,10 @@ export const Button = styled.button<{ color: COLORS }>`
     }
   }};
 
-  border: 1px solid transparent;
-  border-radius: ${BUTTON_BORDER_RADIUS};
-
-  ${({ color }) =>
-    color === COLORS.WHITE &&
-    css`
-      border: 2px solid rgb(107, 114, 128);
-    `}
+  color: ${({ color }) => getContrastTextColor(color)};
 
   &:hover {
-    border: 2px solid rgba(255, 255, 255, 0.526);
+    border: 2px solid rgba(171, 171, 171, 0.553);
     transform: scale(0.97);
   }
 
@@ -85,42 +78,39 @@ export const Button = styled.button<{ color: COLORS }>`
 `;
 
 export const CloseButton = styled.button`
-  min-width: 100%;
-  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4px;
   padding: 8px 0px;
 
-  color: white;
-  font-size: 12px;
+  color: #f2f2f7;
+  font-family: ${FONT_STACK_SYSTEM};
+  font-size: 14px;
+  font-weight: 600;
 
-  background-color: rgb(75, 85, 99);
-  border: none;
+  background-color: #2c2c2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: ${BUTTON_BORDER_RADIUS};
+  cursor: pointer;
 
-  transform: scale(1);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 
   &:hover {
-    background-color: rgb(55, 65, 81);
+    background-color: #3c3c3e;
   }
 
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
   }
-
-  transition: background-color 0.15s ease-in-out, transform 0.15s ease-in-out;
 `;
 
 export const ModalBackground = styled.div`
   position: fixed;
-  z-index: 15;
+  z-index: 49;
   top: -100vh;
   left: -100vw;
-
   width: 1000vw;
   height: 1000vh;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: rgba(0, 0, 0, 0);
 `;
