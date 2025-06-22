@@ -34,7 +34,7 @@ const getBackgroundColor = (color: string) => {
 };
 
 export const Container = styled.div<{
-  corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
+  $corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 }>`
   position: absolute;
   z-index: ${Z_INDEX_REALM_CORE};
@@ -58,23 +58,23 @@ export const Container = styled.div<{
     border-color: rgba(255, 255, 255, 0.3);
   }
 
-  ${(props) => {
-    if (props.corner === "topLeft")
+  ${({ $corner }) => {
+    if ($corner === "topLeft")
       return css`
         top: ${REALM_CORE_OFFSET};
         left: ${REALM_CORE_OFFSET};
       `;
-    if (props.corner === "topRight")
+    if ($corner === "topRight")
       return css`
         top: ${REALM_CORE_OFFSET};
         right: ${REALM_CORE_OFFSET};
       `;
-    if (props.corner === "bottomLeft")
+    if ($corner === "bottomLeft")
       return css`
         bottom: ${REALM_CORE_OFFSET};
         left: ${REALM_CORE_OFFSET};
       `;
-    if (props.corner === "bottomRight")
+    if ($corner === "bottomRight")
       return css`
         bottom: ${REALM_CORE_OFFSET};
         right: ${REALM_CORE_OFFSET};

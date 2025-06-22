@@ -29,6 +29,7 @@ import {
   Title,
   Wrapper,
 } from "./solver.styles";
+import { Footer } from "@mora-jai/lib/componets";
 
 const SOLUTION_RESET_DELAY = 100;
 const MESSAGE_VISIBILITY_DURATION = 3000;
@@ -480,7 +481,7 @@ const Solver: React.FC = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                  <MessageText status={message.status}>
+                  <MessageText $status={message.status}>
                     {message.msg}
                   </MessageText>
                 </motion.div>
@@ -533,6 +534,7 @@ const Solver: React.FC = () => {
           </InfoGroup>
         </SideContainer>
       </Container>
+      <Footer />
     </Wrapper>
   );
 };

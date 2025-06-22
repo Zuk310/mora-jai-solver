@@ -272,7 +272,7 @@ export const ControlsMessage = styled.span`
   line-height: 1.5;
 `;
 
-export const MessageText = styled.p<{ status: "good" | "bad" | "info" }>`
+export const MessageText = styled.p<{ $status: "good" | "bad" | "info" }>`
   margin: 0;
   padding: 10px 20px;
 
@@ -284,13 +284,13 @@ export const MessageText = styled.p<{ status: "good" | "bad" | "info" }>`
   border: 1px solid transparent;
   border-radius: 8px;
 
-  ${({ status }) => {
-    if (status === "good")
+  ${({ $status }) => {
+    if ($status === "good")
       return css`
         background-color: rgba(48, 209, 88, 0.15);
         border-color: rgba(48, 209, 88, 0.4);
       `;
-    else if (status === "bad")
+    else if ($status === "bad")
       return css`
         background-color: rgba(255, 69, 58, 0.15);
         border-color: rgba(255, 69, 58, 0.4);

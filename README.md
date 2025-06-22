@@ -1,45 +1,85 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🧩 Mora Jai Puzzle Solver
 
-## Getting Started
+A web-based, high-performance solver for the Mora Jai puzzles from the game **[Blue Prince](https://store.steampowered.com/app/1528630/Blue_Prince/)**.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![Application Screenshot](./public/screenshot.png)
+_A preview of the Mora Jai Puzzle Solver interface._
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## 📖 About The Project
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+This project is a dedicated tool for players of the game _Blue Prince_. It provides an interface to replicate any in-game Mora Jai puzzle and uses a powerful Breadth-First Search (BFS) algorithm to find the most optimal solution instantly.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+The application is designed not only to be functional but also to match the beautiful, dark, and magical aesthetic of the game itself, providing a seamless experience for players.
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ✨ Features
 
-## Learn More
+- **⚡ High-Performance Solver**: Implements an optimized Breadth-First Search (BFS) algorithm to find the shortest possible solution for any puzzle configuration.
+- **✍️ Full Puzzle Editor**: Recreate any puzzle from the game by clicking on tiles and realm cores to change their colors in "Edit Mode".
+- **🕹️ Interactive Grid**: Play and solve the puzzles manually directly in the browser to test your own theories.
+- **🔮 Random Puzzle Generator**: Get a new, guaranteed-solvable puzzle every time you load the page, with difficulty determined by a "reverse shuffle" algorithm.
+- **🎨 Themed & Modern UI**: The user interface is designed to be clean, modern, and aesthetically aligned with the _Blue Prince_ game style.
+- **📱 Fully Responsive**: The layout is optimized for a seamless experience on both desktop and mobile devices.
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Built With
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+This project is built with a modern and robust tech stack:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Styled-Components](https://styled-components.com/)
+- [Motion/React](https://motion.dev/react) for animations
 
-## Deploy on Vercel
+## 🔧 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To get a local copy up and running, follow these simple steps.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
-=======
-# mora-jai-solver
-Blue prince min game mora jai puzzle solver
->>>>>>> d6e94866cd62b4d1bb9347897f05e51aed454941
+### Prerequisites
+
+Make sure you have Node.js and npm (or yarn) installed on your machine.
+
+- npm
+  ```sh
+  npm install npm@latest -g
+  ```
+
+### Installation
+
+1.  Clone the repo
+    ```sh
+    git clone [https://github.com/Zuk310/mora-jai-solver.git](https://github.com/Zuk310/mora-jai-solver.git)
+    ```
+2.  Navigate to the project directory
+    ```sh
+    cd mora-jai-solver
+    ```
+3.  Install NPM packages
+    ```sh
+    npm install
+    ```
+4.  Run the development server
+    ```sh
+    npm run dev
+    ```
+5.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 🙏 Acknowledgments
+
+- This is an unofficial, fan-made project created out of love for the game.
+- All credit for the game **Blue Prince**, its design, puzzle concepts, and logic goes to the incredible development team at **[Dogubomb](https://twitter.com/dogubomb)**.
+- The project uses icons from the **[React Icons](https://react-icons.github.io/react-icons/)** library.
+
+## 👨‍💻 Author
+
+👤 **Zuk**
+
+- GitHub: [@Zuk310](https://github.com/Zuk310)
+
+---

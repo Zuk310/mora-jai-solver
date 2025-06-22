@@ -25,7 +25,7 @@ const SolutionOverlay: React.FC<SolverStepsOverlayProps> = ({
   });
 
   return (
-    <Overlay isVisible={isVisible && solutionSteps.length > 0}>
+    <Overlay $isVisible={isVisible && solutionSteps.length > 0}>
       <Grid>
         {Array.from({ length: 3 }).map((_, r) =>
           Array.from({ length: 3 }).map((__, c) => {

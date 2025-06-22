@@ -15,7 +15,7 @@ const RealmCore: React.FC<RealmCoreProps> = ({
 }) => {
   return (
     <Container
-      corner={corner}
+      $corner={corner}
       onClick={onClick}
       title={`Target: ${targetColor}`}
     >

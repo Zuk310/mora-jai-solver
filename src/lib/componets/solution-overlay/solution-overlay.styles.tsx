@@ -6,7 +6,7 @@ const OVERLAY_GRID_ROW_GAP = "10px";
 const OVERLAY_GRID_COL_GAP = "16px";
 const OVERLAY_GRID_PADDING = "14px 20px 17px 20px";
 
-export const Overlay = styled.div<{ isVisible: boolean }>`
+export const Overlay = styled.div<{ $isVisible: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -21,8 +21,8 @@ export const Overlay = styled.div<{ isVisible: boolean }>`
   backdrop-filter: blur(5px);
   border-radius: 24px;
 
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  pointer-events: ${({ isVisible }) => (isVisible ? "auto" : "none")};
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
   overflow: hidden;
   transition: opacity 0.3s ease-in-out;
 `;
