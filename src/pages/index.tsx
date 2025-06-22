@@ -1,7 +1,11 @@
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Solver from "../lib/features/solver/solver";
 
 export default function IndexPage() {
+  const router = useRouter();
+  const basePath = router.basePath;
+
   return (
     <>
       <Head>
@@ -18,27 +22,27 @@ export default function IndexPage() {
         <meta name="author" content="Zuk" />
         <meta name="theme-color" content="#121212" />
 
-        {/* Favicon Links */}
+        {/* Favicon Links - Prefixed with the router's basePath */}
         <link
           rel="apple-touch-icon"
           sizes="180x180"
-          href="/mora-jai-solver/apple-touch-icon.png"
+          href={`${basePath}/apple-touch-icon.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/mora-jai-solver/favicon-32x32.png"
+          href={`${basePath}/favicon-32x32.png`}
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/mora-jai-solver/favicon-16x16.png"
+          href={`${basePath}/favicon-16x16.png`}
         />
-        <link rel="manifest" href="/mora-jai-solver/site.webmanifest" />
+        <link rel="manifest" href={`${basePath}/site.webmanifest`} />
 
-        {/* Open Graph / Facebook */}
+        {/* Social media links remain as absolute URLs */}
         <meta property="og:type" content="website" />
         <meta
           property="og:url"
@@ -53,24 +57,6 @@ export default function IndexPage() {
           property="og:image"
           content="https://Zuk310.github.io/mora-jai-solver/og-image.png"
         />
-
-        {/* Twitter */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta
-          property="twitter:url"
-          content="https://Zuk310.github.io/mora-jai-solver/"
-        />
-        <meta property="twitter:title" content="Mora Jai Puzzle Solver" />
-        <meta
-          property="twitter:description"
-          content="An advanced solver for the Mora Jai puzzles from the game Blue Prince."
-        />
-        <meta
-          property="twitter:image"
-          content="https://Zuk310.github.io/mora-jai-solver/og-image.png"
-        />
-
-        {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:url"
