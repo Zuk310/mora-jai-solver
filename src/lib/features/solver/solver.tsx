@@ -32,9 +32,6 @@ import { Footer } from "@mora-jai/lib/componets";
 
 const SOLUTION_RESET_DELAY = 100;
 const MESSAGE_VISIBILITY_DURATION = 3000;
-const COLOR_PICKER_WIDTH = 160;
-const COLOR_PICKER_HEIGHT = 150;
-const COLOR_PICKER_GAP = 10;
 const Z_INDEX_COLOR_PICKER = 200;
 const GRID_SIZE = 3;
 

@@ -1,9 +1,8 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
 const PICKER_WIDTH = "220px";
-const BUTTON_SIZE = "40px";
 const BUTTON_BORDER_RADIUS = "8px";
 const GAP_SIZE = "8px";
 const FONT_STACK_SYSTEM = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
