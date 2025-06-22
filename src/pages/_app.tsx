@@ -1,6 +1,8 @@
-import Solver from "@mora-jai/lib/features/solver/solver";
+import type { AppProps } from "next/app";
 import "../lib/styles/app.css";
 
-export default function App() {
-  return <Solver />;
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
 }
+
+export default MyApp;
