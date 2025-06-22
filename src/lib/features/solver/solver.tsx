@@ -62,29 +62,10 @@ interface ColorPickerState {
 }
 
 const Solver: React.FC = () => {
-  const HARD_TEST_GRID: COLORS[][] = [
-    [COLORS.PINK, COLORS.RED, COLORS.BLUE],
-    [COLORS.ORANGE, COLORS.WHITE, COLORS.YELLOW],
-    [COLORS.BLACK, COLORS.GREEN, COLORS.VIOLET],
-  ];
-
-  const HARD_TEST_REALMS: {
-    topLeft: COLORS;
-    topRight: COLORS;
-    bottomLeft: COLORS;
-    bottomRight: COLORS;
-  } = {
-    topLeft: COLORS.ORANGE,
-    topRight: COLORS.ORANGE,
-    bottomLeft: COLORS.ORANGE,
-    bottomRight: COLORS.ORANGE,
-  };
   const workerRef = useRef<Worker | null>(null);
 
-  const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(HARD_TEST_GRID));
-  const [realmColors, setRealmColors] = useState(HARD_TEST_REALMS);
-  // const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
-  // const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
+  const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
+  const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
   const [solveOverlay, setSolveOverlay] = useState<boolean>(false);
   const [solutionSteps, setSolutionSteps] = useState<SolutionStep[]>([]);
   const [solving, setSolving] = useState<boolean>(false);
@@ -224,17 +205,42 @@ const Solver: React.FC = () => {
         const puzzleRect = puzzleContainerRef.current?.getBoundingClientRect();
 
         if (!puzzleRect) return;
-
         const position = calculateColorPickerPosition(rect, puzzleRect);
+        setColorPicker({ type: "realm", corner, position });
+      } else {
+        if (solving) return;
+        const adjacentCoords = {
+          topLeft: { row: 0, col: 0 },
+          topRight: { row: 0, col: 2 },
+          bottomLeft: { row: 2, col: 0 },
+          bottomRight: { row: 2, col: 2 },
+        };
 
-        setColorPicker({
-          type: "realm",
-          corner,
-          position,
-        });
+        const { row: adjacentRow, col: adjacentCol } = adjacentCoords[corner];
+
+        if (grid[adjacentRow][adjacentCol] !== realmColors[corner]) {
+          setGrid(deepCopyGrid(lastUserProvidedState.grid));
+          setRealmColors({ ...lastUserProvidedState.realmColors });
+          setMessage({ msg: "Puzzle reset!", status: "info", visible: true });
+          resetPuzzleState();
+        } else {
+          setMessage({
+            msg: "Corner color is matched!",
+            status: "good",
+            visible: true,
+          });
+        }
       }
     },
-    [editingMode, calculateColorPickerPosition]
+    [
+      editingMode,
+      solving,
+      grid,
+      realmColors,
+      lastUserProvidedState,
+      calculateColorPickerPosition,
+      resetPuzzleState,
+    ]
   );
 
   const handleColorSelect = useCallback(
