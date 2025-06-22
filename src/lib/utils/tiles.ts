@@ -6,6 +6,9 @@ import {
   CROSS_AROUND_COORDS_LOOKUP,
 } from "./solver";
 
+const GRID_SIZE = 3;
+const CENTER_COORD = 1;
+
 export const applyTileEffect = (
   currentGrid: COLORS[][],
   row: number,
@@ -25,11 +28,11 @@ export const applyTileEffect = (
       rowToRotate.unshift(lastTile);
       break;
     case COLORS.GREEN:
-      if (row === 1 && col === 1) {
+      if (row === CENTER_COORD && col === CENTER_COORD) {
         break;
       }
-      const oppositeRow = 2 - row;
-      const oppositeCol = 2 - col;
+      const oppositeRow = GRID_SIZE - 1 - row;
+      const oppositeCol = GRID_SIZE - 1 - col;
       [newGrid[row][col], newGrid[oppositeRow][oppositeCol]] = [
         newGrid[oppositeRow][oppositeCol],
         newGrid[row][col],
@@ -50,7 +53,7 @@ export const applyTileEffect = (
       }
       break;
     case COLORS.VIOLET:
-      if (row < 2) {
+      if (row < GRID_SIZE - 1) {
         [newGrid[row][col], newGrid[row + 1][col]] = [
           newGrid[row + 1][col],
           newGrid[row][col],
@@ -79,8 +82,8 @@ export const applyTileEffect = (
       }
       break;
     case COLORS.RED:
-      for (let r = 0; r < 3; r++) {
-        for (let c = 0; c < 3; c++) {
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
           if (newGrid[r][c] === COLORS.WHITE) {
             newGrid[r][c] = COLORS.BLACK;
           } else if (newGrid[r][c] === COLORS.BLACK) {
@@ -117,13 +120,12 @@ export const applyTileEffect = (
       }
       break;
     case COLORS.BLUE:
-      const centerTileColor = currentGrid[1][1];
+      const centerTileColor = currentGrid[CENTER_COORD][CENTER_COORD];
       if (centerTileColor !== COLORS.BLUE) {
         newGrid = applyTileEffect(newGrid, row, col, centerTileColor);
       }
       break;
     default:
-      console.warn(`Unknown tile color: ${tileColor} at (${row}, ${col})`);
       break;
   }
   return newGrid;

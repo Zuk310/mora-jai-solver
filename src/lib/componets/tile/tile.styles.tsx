@@ -2,28 +2,32 @@ import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
+const TILE_SIZE = "140px";
+const TILE_BORDER_RADIUS = "12px";
+const FOCUS_SHADOW_COLOR = "#0a84ff";
+
 const getBorderColor = (color: string | undefined) => {
   switch (color) {
     case COLORS.GREY:
-      return "rgb(107, 114, 128)";
+      return "rgb(75, 85, 99)";
     case COLORS.BLACK:
-      return "rgb(17, 24, 39)";
+      return "rgb(0, 0, 0)";
     case COLORS.GREEN:
-      return "rgb(4, 120, 87)";
+      return "rgb(21, 94, 69)";
     case COLORS.PINK:
-      return "rgb(219, 39, 119)";
+      return "rgb(157, 23, 77)";
     case COLORS.YELLOW:
-      return "rgb(234, 179, 8)";
+      return "rgb(180, 133, 7)";
     case COLORS.VIOLET:
-      return "rgb(67, 56, 202)";
+      return "rgb(79, 70, 229)";
     case COLORS.WHITE:
-      return "rgb(156, 163, 175)";
+      return "rgb(209, 213, 219)";
     case COLORS.RED:
-      return "rgb(185, 28, 28)";
+      return "rgb(153, 27, 27)";
     case COLORS.ORANGE:
-      return "rgb(234, 88, 12)";
+      return "rgb(194, 65, 12)";
     case COLORS.BLUE:
-      return "rgb(37, 99, 235)";
+      return "rgb(29, 78, 216)";
     default:
       return "black";
   }
@@ -33,53 +37,19 @@ export const StyledTile = styled.button<{
   color: COLORS;
   $isEditingMode: boolean;
 }>`
-  width: 7rem;
-  height: 7rem;
-  @media (min-width: 640px) {
-    width: 8rem;
-    height: 8rem;
-  }
-  @media (min-width: 768px) {
-    width: 9rem;
-    height: 9rem;
-  }
-  @media (min-width: 1024px) {
-    width: 10rem;
-    height: 10rem;
-  }
-  border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  font-size: 1.25rem;
-  @media (min-width: 640px) {
-    font-size: 1.5rem;
-  }
-  @media (min-width: 768px) {
-    font-size: 1.875rem;
-  }
-  font-weight: 600;
-  transform: scale(1);
-  transition-property: all;
-  transition-duration: 200ms;
-  transition-timing-function: ease-out;
-  &:hover {
-    transform: scale(1.05);
-  }
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(171, 171, 171, 0.426);
-  }
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
+  width: ${TILE_SIZE};
+  height: ${TILE_SIZE};
 
-  background-color: ${(props) => {
-    switch (props.color) {
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  color: ${({ color }) => getContrastTextColor(color)};
+
+  background-color: ${({ color }) => {
+    switch (color) {
       case COLORS.GREY:
         return "rgb(156, 163, 175)";
       case COLORS.BLACK:
@@ -93,7 +63,7 @@ export const StyledTile = styled.button<{
       case COLORS.VIOLET:
         return "rgb(99, 102, 241)";
       case COLORS.WHITE:
-        return "rgb(255, 255, 255)";
+        return "rgb(243, 244, 246)";
       case COLORS.RED:
         return "rgb(220, 38, 38)";
       case COLORS.ORANGE:
@@ -104,14 +74,34 @@ export const StyledTile = styled.button<{
         return "white";
     }
   }};
-  color: ${(props) => getContrastTextColor(props.color)};
-  border: 2px solid ${(props) => getBorderColor(props.color)};
+
+  border: 1px solid ${({ color }) => getBorderColor(color)};
+  border-radius: ${TILE_BORDER_RADIUS};
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+
+  transition: background-color 0.3s ease, transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+
+  &:hover {
+    z-index: 5;
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px ${FOCUS_SHADOW_COLOR};
+  }
 
   ${(props) =>
     props.$isEditingMode &&
     css`
       cursor: pointer;
       border-style: dashed;
-      border-color: rgb(75, 85, 99);
+      border-color: rgba(255, 255, 255, 0.3);
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+      }
     `}
 `;

@@ -2,43 +2,43 @@ import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
+const PICKER_WIDTH = "200px";
+const BUTTON_SIZE = "40px";
+const BUTTON_BORDER_RADIUS = "8px";
+const GAP_SIZE = "5px";
+
 export const Container = styled.div`
   position: absolute;
   z-index: 50;
-
-  padding: 10px;
-  box-sizing: border-box;
-
-  width: 200px;
-
-  border: 2px solid rgb(107, 114, 128);
-  border-radius: 10px;
-
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: ${GAP_SIZE};
+
+  width: ${PICKER_WIDTH};
+  padding: 10px;
+  box-sizing: border-box;
 
   background: linear-gradient(
     to bottom right,
     rgb(55, 65, 81),
     rgb(17, 24, 39)
   );
+  border: 2px solid rgb(107, 114, 128);
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 `;
 
 export const Button = styled.button<{ color: COLORS }>`
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border: 1px solid transparent;
+  width: ${BUTTON_SIZE};
+  height: ${BUTTON_SIZE};
+
+  font-size: 14px;
+  font-weight: 600;
+  color: ${({ color }) => getContrastTextColor(color)};
 
   background-color: ${({ color }) => {
     switch (color) {
@@ -67,7 +67,9 @@ export const Button = styled.button<{ color: COLORS }>`
     }
   }};
 
-  color: ${({ color }) => getContrastTextColor(color)};
+  border: 1px solid transparent;
+  border-radius: ${BUTTON_BORDER_RADIUS};
+
   ${({ color }) =>
     color === COLORS.WHITE &&
     css`
@@ -85,14 +87,15 @@ export const Button = styled.button<{ color: COLORS }>`
 export const CloseButton = styled.button`
   min-width: 100%;
   margin-top: 8px;
+  padding: 8px 0px;
 
   color: white;
   font-size: 12px;
-  padding: 8px 0px;
-  border-radius: 8px;
-  border: none;
 
   background-color: rgb(75, 85, 99);
+  border: none;
+  border-radius: ${BUTTON_BORDER_RADIUS};
+
   transform: scale(1);
 
   &:hover {
@@ -108,13 +111,16 @@ export const CloseButton = styled.button`
 
 export const ModalBackground = styled.div`
   position: fixed;
+  z-index: 15;
   top: -100vh;
   left: -100vw;
+
   width: 1000vw;
   height: 1000vh;
-  background-color: rgba(0, 0, 0, 00);
+
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 15;
+
+  background-color: rgba(0, 0, 0, 0);
 `;

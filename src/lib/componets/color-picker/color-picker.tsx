@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { COLORS } from "../../constants";
 import {
   Container,
@@ -10,19 +10,17 @@ import {
 interface ColorPickerProps {
   onSelectColor: (color: COLORS) => void;
   onClose: () => void;
-  position: { top: number; left: number };
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
   onSelectColor,
   onClose,
-  position,
 }) => {
   const colorsArray = Object.values(COLORS);
   return (
-    <Fragment>
+    <>
       <ModalBackground onClick={onClose} />
-      <Container style={position}>
+      <Container>
         {colorsArray.map((color) => (
           <Button
             key={color}
@@ -35,7 +33,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
         ))}
         <CloseButton onClick={onClose}>Close</CloseButton>
       </Container>
-    </Fragment>
+    </>
   );
 };
 

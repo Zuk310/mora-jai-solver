@@ -8,8 +8,7 @@ interface TileProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const Tile: React.FC<TileProps> = (props: TileProps) => {
-  const { color, isEditingMode, onClick } = props;
+const Tile: React.FC<TileProps> = ({ color, isEditingMode, onClick }) => {
   return (
     <StyledTile color={color} $isEditingMode={isEditingMode} onClick={onClick}>
       {color.charAt(0)}

@@ -1,245 +1,248 @@
-import styled, { css, keyframes } from "styled-components";
+import styled, { css } from "styled-components";
 
-const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+const Z_INDEX_PUZZLE = 10;
+const FONT_STACK_SYSTEM = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
 
 const getButtonStyles = (variant?: string, isActive?: boolean) => {
   const baseStyles = css`
-    padding: 0.75rem 1.5rem;
-    width: 100%;
-
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border: none;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 24px;
+
+    font-family: ${FONT_STACK_SYSTEM};
+    font-size: 15px;
+    font-weight: 600;
+    color: #f2f2f7;
+
+    background-color: #2c2c2e;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
 
     &:disabled {
-      opacity: 0.5;
+      color: rgba(255, 255, 255, 0.3);
+      background-color: #1c1c1e;
+      border-color: transparent;
       cursor: not-allowed;
-      transform: none;
     }
 
-    &:not(:disabled):hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    &:not(:disabled):active {
-      transform: translateY(0);
-    }
-
-    @media (max-width: 768px) {
-      padding: 0.625rem 1.25rem;
-      font-size: 0.8rem;
-      min-height: 40px;
-    }
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+      color 0.2s ease;
   `;
+
+  let defaultBg = "#2c2c2e";
+  let hoverBg = "";
+  let hoverBorder = "";
 
   switch (variant) {
     case "edit":
-      return css`
-        ${baseStyles}
-        background-color: ${isActive ? "#dc2626" : "#3b82f6"};
-        color: white;
-
-        &:not(:disabled):hover {
-          background-color: ${isActive ? "#b91c1c" : "#2563eb"};
-        }
-      `;
-
+      hoverBg = isActive ? "#ff453a" : "#0a84ff";
+      hoverBorder = isActive ? "#ff453a" : "#0a84ff";
+      break;
     case "solve":
-      return css`
-        ${baseStyles}
-
-        background-color: #10b981;
-        color: white;
-
-        &:not(:disabled):hover {
-          background-color: #059669;
-        }
-      `;
-
+      defaultBg = "#3c3c3e";
+      hoverBg = "#32d74b";
+      hoverBorder = "#32d74b";
+      break;
     case "reset":
-      return css`
-        ${baseStyles}
-        background-color: #f59e0b;
-        color: white;
-
-        &:not(:disabled):hover {
-          background-color: #d97706;
-        }
-      `;
-
+      hoverBg = "#ff9f0a";
+      hoverBorder = "#ff9f0a";
+      break;
     case "clear":
-      return css`
-        ${baseStyles}
-        background-color: #ef4444;
-        color: white;
-
-        &:not(:disabled):hover {
-          background-color: #dc2626;
-        }
-      `;
-
-    default:
-      return css`
-        ${baseStyles}
-        background-color: #6b7280;
-        color: white;
-
-        &:not(:disabled):hover {
-          background-color: #4b5563;
-        }
-      `;
+      hoverBg = "#ff453a";
+      hoverBorder = "#ff453a";
+      break;
   }
+
+  return css`
+    ${baseStyles}
+    background-color: ${defaultBg};
+
+    &:not(:disabled):hover {
+      background-color: ${hoverBg};
+      border-color: ${hoverBorder};
+    }
+
+    ${isActive &&
+    variant === "edit" &&
+    css`
+      background-color: #0a84ff;
+      border-color: #0a84ff;
+    `}
+  `;
 };
 
 export const Wrapper = styled.div`
-  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  min-height: 100vh;
-  width: 100vw;
-  background-color: rgb(243, 244, 246);
-  font-family: "Inter", sans-serif;
-
-  overflow: hidden;
+  background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+  font-family: ${FONT_STACK_SYSTEM};
 `;
 
 export const Container = styled.div`
-  width: 100%;
-  max-width: 1800px;
-
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 64px;
 
-  padding: 20px 40px 0px;
-  box-sizing: border-box;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 24px;
 `;
 
 export const Title = styled.h1`
-  font-size: 2.25rem;
+  margin-bottom: 24px;
+
+  font-size: 36px;
   font-weight: 700;
-  margin-bottom: 2rem;
-  color: rgb(180, 83, 9);
-  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07))
-    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+  color: #fff;
   text-align: center;
+  letter-spacing: -0.025em;
 `;
 
 export const PuzzleContainer = styled.div`
-  z-index: 10;
   position: relative;
-  background-color: rgb(77, 39, 0);
-  border: 4px solid rgb(46, 25, 0);
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  padding: 1.5rem;
-  transform: rotate(-1deg) skewY(1deg) scale(0.95);
-  transition-property: all;
-  transition-duration: 300ms;
-  transition-timing-function: ease-out;
-  transform-origin: center;
+  z-index: ${Z_INDEX_PUZZLE};
+
+  width: 540px;
+  height: 540px;
+  padding: 24px;
+  box-sizing: border-box;
+
+  background: rgba(18, 18, 18, 0.75);
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 `;
 
 export const GridContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 1.5rem;
-  background-color: rgb(120, 53, 15);
-  border-radius: 0.5rem;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  border: 2px solid rgb(77, 39, 0);
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 12px;
+
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
 `;
 
 export const SideContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: stretch;
+  gap: 24px;
 
-  height: 520px;
   width: 300px;
-  padding: 20px;
-  box-sizing: border-box;
+  min-width: 300px;
+`;
 
-  background-color: rgb(150, 150, 150);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 2px solid rgba(176, 176, 176, 0.568);
+export const InfoGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 24px;
+
+  background: rgba(18, 18, 18, 0.75);
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    border-color 0.2s ease-out;
+`;
+
+export const CenterColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
 `;
 
 export const GuideText = styled.span`
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
-  color: rgb(0, 0, 0);
+  color: #8e8e93;
+  line-height: 1.6;
 `;
 
-export const GuideListContainer = styled.div`
-  b {
-    margin-bottom: 10px;
-  }
-`;
+export const GuideListContainer = styled.div``;
+
 export const GuideListTitle = styled.h3`
+  margin: 0 0 12px 0;
+
   font-size: 16px;
   font-weight: 600;
-  color: rgb(0, 0, 0);
-  margin-bottom: 8px;
-  padding-left: 4px;
+  color: #fff;
+  letter-spacing: -0.01em;
 `;
+
 export const GuideList = styled.ul`
-  padding: 0;
   margin: 0;
-  width: 100%;
-  padding-left: 20px;
+  padding: 0 0 0 20px;
   box-sizing: border-box;
 `;
+
 export const GuideListItem = styled.li`
+  padding-top: 6px;
+
   font-size: 13px;
   font-weight: 400;
-  color: rgb(0, 0, 0);
+  color: #8e8e93;
+  line-height: 1.5;
 
-  padding-top: 5px;
+  b {
+    color: #c7c7cc;
+  }
 `;
 
 export const Subtitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: rgb(0, 0, 0);
   margin: 0;
-  text-align: center;
+
+  font-size: 20px;
+  font-weight: 600;
+  color: #f2f2f7;
+  text-align: left;
 `;
 
-export const GuideContainer = styled.div`
-  ${Subtitle} {
-    margin-bottom: 10px;
-  }
-`;
 export const ButtonContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+
   width: 100%;
 `;
 
@@ -251,64 +254,48 @@ export const StyledButton = styled.button<{
 `;
 
 export const MessageArea = styled.div`
-  margin-top: 2rem;
-  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  p {
-    text-align: center;
-    font-size: 1.125rem;
-    &.success {
-      color: rgb(22, 163, 74);
-    }
-    &.error {
-      color: rgb(185, 28, 28);
-    }
-  }
+  height: 48px;
 `;
 
 export const ControlsMessage = styled.span`
-  font-size: 18px;
-  font-weight: 500;
-  color: rgb(0, 0, 0);
-  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #8e8e93;
+  text-align: left;
+  line-height: 1.5;
 `;
 
 export const MessageText = styled.p<{ status: "good" | "bad" | "info" }>`
-  font-size: 1rem;
-  font-weight: 500;
-  text-align: center;
   margin: 0;
-  padding: 0.75rem 1.5rem;
+  padding: 10px 20px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+
+  border: 1px solid transparent;
   border-radius: 8px;
-  animation: ${slideIn} 0.3s ease-out;
 
   ${({ status }) => {
-    if (status === "good") {
+    if (status === "good")
       return css`
-        color: #065f46;
-        background-color: #d1fae5;
-        border: 1px solid #a7f3d0;
+        background-color: rgba(48, 209, 88, 0.15);
+        border-color: rgba(48, 209, 88, 0.4);
       `;
-    } else if (status === "bad") {
+    else if (status === "bad")
       return css`
-        color: #991b1b;
-        background-color: #fee2e2;
-        border: 1px solid #fecaca;
+        background-color: rgba(255, 69, 58, 0.15);
+        border-color: rgba(255, 69, 58, 0.4);
       `;
-    } else {
+    else
       return css`
-        color: #1e40af;
-        background-color: #bfdbfe;
-        border: 1px solid #93c5fd;
+        background-color: rgba(10, 132, 255, 0.15);
+        border-color: rgba(10, 132, 255, 0.4);
       `;
-    }
   }}
-
-  @media (max-width: 768px) {
-    font-size: 0.875rem;
-    padding: 0.625rem 1.25rem;
-  }
 `;
