@@ -197,7 +197,7 @@ const Solver: React.FC = () => {
           resetPuzzleState();
         } else {
           setMessage({
-            msg: "Realm core is matched!",
+            msg: "Corner color is matched!",
             status: "good",
             visible: true,
           });
@@ -366,8 +366,8 @@ const Solver: React.FC = () => {
             <Subtitle>Guide</Subtitle>
             <GuideText>
               The objective of the Mora Jai Puzzle is to match the colors of the
-              four corner tiles on the 3x3 grid with their respective
-              &quot;Realm Cores.&quot;
+              four corner tiles on the 3x3 grid with their respective corner
+              colors.
             </GuideText>
           </InfoGroup>
           <InfoGroup>
