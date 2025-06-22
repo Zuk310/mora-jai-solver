@@ -395,13 +395,13 @@ const Solver: React.FC = () => {
                   <b>Grey:</b> Does nothing.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>Black:</b> Shifts its row left.
+                  <b>Black:</b> Shifts its row right.
                 </GuideListItem>
                 <GuideListItem>
                   <b>Green:</b> Swaps with the opposite tile.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>Pink:</b> Rotates its 8 neighbors clockwise.
+                  <b>Pink:</b> Rotates neighboring tiles clockwise.
                 </GuideListItem>
                 <GuideListItem>
                   <b>Yellow:</b> Swaps with the tile above.
@@ -410,17 +410,17 @@ const Solver: React.FC = () => {
                   <b>Violet:</b> Swaps with the tile below.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>White:</b> Turns itself and 4 cross neighbors to Grey.
+                  <b>White:</b> Turns adjacent gray tiles white; if none, turns
+                  itself gray.
                 </GuideListItem>
                 <GuideListItem>
                   <b>Red:</b> White becomes Black; Black becomes Red.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>Orange:</b> Becomes the majority color of its 4 cross
-                  neighbors.
+                  <b>Orange:</b> Becomes the majority color of its neighbors.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>Blue:</b> Triggers the effect of the center tile.
+                  <b>Blue:</b> Triggers the center tile effect.
                 </GuideListItem>
               </GuideList>
             </GuideListContainer>

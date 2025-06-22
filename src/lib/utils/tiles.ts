@@ -16,70 +16,37 @@ const COORDS_TO_INDEX: { [key: string]: number } = {
   "2,2": 8,
 };
 
-const ALL_AROUND_COORDS_LOOKUP: TileCoords[][] = [
-  [
-    { r: 0, c: 1 },
-    { r: 1, c: 1 },
-    { r: 1, c: 0 },
-  ],
-  [
-    { r: 0, c: 2 },
-    { r: 1, c: 2 },
-    { r: 2, c: 2 },
-    { r: 2, c: 1 },
-    { r: 2, c: 0 },
-    { r: 1, c: 0 },
-    { r: 0, c: 0 },
-  ],
-  [
-    { r: 1, c: 2 },
-    { r: 2, c: 2 },
-    { r: 2, c: 1 },
-    { r: 1, c: 1 },
-    { r: 0, c: 1 },
-  ],
-  [
-    { r: 0, c: 0 },
-    { r: 0, c: 1 },
-    { r: 1, c: 1 },
-    { r: 2, c: 1 },
-    { r: 2, c: 0 },
-  ],
-  [
-    { r: 0, c: 0 },
-    { r: 0, c: 1 },
-    { r: 0, c: 2 },
-    { r: 1, c: 2 },
-    { r: 2, c: 2 },
-    { r: 2, c: 1 },
-    { r: 2, c: 0 },
-    { r: 1, c: 0 },
-  ],
-  [
-    { r: 2, c: 2 },
-    { r: 2, c: 1 },
-    { r: 1, c: 1 },
-    { r: 0, c: 1 },
-    { r: 0, c: 2 },
-  ],
-  [
-    { r: 1, c: 0 },
-    { r: 1, c: 1 },
-    { r: 2, c: 1 },
-  ],
-  [
-    { r: 2, c: 0 },
-    { r: 1, c: 0 },
-    { r: 1, c: 1 },
-    { r: 1, c: 2 },
-    { r: 2, c: 2 },
-  ],
-  [
-    { r: 1, c: 2 },
-    { r: 1, c: 1 },
-    { r: 2, c: 1 },
-  ],
+const CLOCKWISE_OFFSETS = [
+  { dr: -1, dc: -1 },
+  { dr: -1, dc: 0 },
+  { dr: -1, dc: 1 },
+  { dr: 0, dc: 1 },
+  { dr: 1, dc: 1 },
+  { dr: 1, dc: 0 },
+  { dr: 1, dc: -1 },
+  { dr: 0, dc: -1 },
 ];
+
+const ALL_AROUND_COORDS_LOOKUP: TileCoords[][] = Array(GRID_SIZE * GRID_SIZE)
+  .fill(null)
+  .map(() => []);
+
+for (let r = 0; r < GRID_SIZE; r++) {
+  for (let c = 0; c < GRID_SIZE; c++) {
+    const currentIndex = COORDS_TO_INDEX[`${r},${c}`];
+    const neighborsForCurrentCell: TileCoords[] = [];
+
+    for (const offset of CLOCKWISE_OFFSETS) {
+      const nr = r + offset.dr;
+      const nc = c + offset.dc;
+
+      if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+        neighborsForCurrentCell.push({ r: nr, c: nc });
+      }
+    }
+    ALL_AROUND_COORDS_LOOKUP[currentIndex] = neighborsForCurrentCell;
+  }
+}
 
 const CROSS_AROUND_COORDS_LOOKUP: TileCoords[][] = [
   [
