@@ -26,8 +26,8 @@ export const Footer: React.FC = () => {
         </FooterLink>
 
         <FooterText>
-          All credit goes to Dogubomb and Dogubomb Inc. This is an unofficial
-          fan project.
+          All credit goes to Dogubomb, Dogubomb Inc. This is an unofficial fan
+          project.
         </FooterText>
 
         <FooterText>
