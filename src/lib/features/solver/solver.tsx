@@ -38,6 +38,9 @@ const COLOR_PICKER_GAP = 10;
 const Z_INDEX_COLOR_PICKER = 200;
 const GRID_SIZE = 3;
 
+type ColorPickerType = "tile" | "corner";
+type Corner = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
+
 interface SavedState {
   grid: COLORS[][];
   realmColors: {
@@ -141,23 +144,46 @@ const Solver: React.FC = () => {
   );
 
   const calculateColorPickerPosition = useCallback(
-    (rect: DOMRect, puzzleRect: DOMRect): { top: number; left: number } => {
-      let left =
-        rect.left - puzzleRect.left + rect.width / 2 - COLOR_PICKER_WIDTH / 2;
-      let top = rect.top - puzzleRect.top + rect.height + COLOR_PICKER_GAP;
+    (
+      rect: DOMRect,
+      puzzleRect: DOMRect,
+      options: {
+        isBottomElement: boolean;
+        type: ColorPickerType;
+        corner?: Corner;
+        cornerSide?: "left" | "right";
+      }
+    ): { top: number; left: number } => {
+      const COLOR_PICKER_WIDTH = 220;
+      const COLOR_PICKER_HEIGHT = 140;
+      const GAP = 5;
+      const BOTTOM_GAP = 72;
 
-      if (left < 0) left = 0;
-      if (left + COLOR_PICKER_WIDTH > puzzleRect.width) {
-        left = puzzleRect.width - COLOR_PICKER_WIDTH;
+      const CORNER_HORIZONTAL_ADJUST = 50;
+
+      const { isBottomElement, type, corner } = options;
+
+      const elementCenterX = rect.left + rect.width / 2;
+      const elementTopY = rect.top;
+      const elementBottomY = rect.bottom;
+
+      let left = elementCenterX - puzzleRect.left - COLOR_PICKER_WIDTH / 2;
+
+      let top: number;
+      if (isBottomElement) {
+        const gap = BOTTOM_GAP + GAP;
+
+        top = elementTopY - puzzleRect.top - COLOR_PICKER_HEIGHT - gap;
+      } else {
+        top = elementBottomY - puzzleRect.top + GAP;
       }
 
-      const potentialBottom = puzzleRect.top + top + COLOR_PICKER_HEIGHT;
-      if (
-        potentialBottom > window.innerHeight &&
-        top > rect.top - puzzleRect.top
-      ) {
-        top =
-          rect.top - puzzleRect.top - COLOR_PICKER_HEIGHT - COLOR_PICKER_GAP;
+      if (type === "corner" && corner) {
+        const isLeft = options.cornerSide === "left";
+        const horizontalAdjust = isLeft
+          ? CORNER_HORIZONTAL_ADJUST
+          : -CORNER_HORIZONTAL_ADJUST;
+        left += horizontalAdjust;
       }
 
       return { top, left };
@@ -173,7 +199,10 @@ const Solver: React.FC = () => {
 
         if (!puzzleRect) return;
 
-        const position = calculateColorPickerPosition(rect, puzzleRect);
+        const position = calculateColorPickerPosition(rect, puzzleRect, {
+          isBottomElement: row === 2,
+          type: "tile",
+        });
 
         setColorPicker({
           type: "tile",
@@ -204,8 +233,15 @@ const Solver: React.FC = () => {
         const rect = event.currentTarget.getBoundingClientRect();
         const puzzleRect = puzzleContainerRef.current?.getBoundingClientRect();
 
+        const isBottom = corner === "bottomLeft" || corner === "bottomRight";
+
         if (!puzzleRect) return;
-        const position = calculateColorPickerPosition(rect, puzzleRect);
+        const position = calculateColorPickerPosition(rect, puzzleRect, {
+          isBottomElement: isBottom,
+          type: "corner",
+          cornerSide: corner.includes("Left") ? "left" : "right",
+          corner,
+        });
         setColorPicker({ type: "realm", corner, position });
       } else {
         if (solving) return;
