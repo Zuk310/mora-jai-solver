@@ -11,18 +11,19 @@ export enum COLORS {
   BLUE = "Blue",
 }
 
-export const REALM_SHAPES: { [key in COLORS]: string } = {
-  [COLORS.GREY]: "○",
-  [COLORS.BLACK]: "□",
-  [COLORS.GREEN]: "△",
-  [COLORS.PINK]: "♡",
-  [COLORS.YELLOW]: "☆",
-  [COLORS.VIOLET]: "♢",
-  [COLORS.WHITE]: "⌘",
-  [COLORS.RED]: "✕",
-  [COLORS.ORANGE]: "☼",
-  [COLORS.BLUE]: "💧",
-};
+//TODO: Add when shapes are implemented
+// export const REALM_SHAPES: { [key in COLORS]: string } = {
+//   [COLORS.GREY]: "○",
+//   [COLORS.BLACK]: "□",
+//   [COLORS.GREEN]: "△",
+//   [COLORS.PINK]: "♡",
+//   [COLORS.YELLOW]: "☆",
+//   [COLORS.VIOLET]: "♢",
+//   [COLORS.WHITE]: "⌘",
+//   [COLORS.RED]: "✕",
+//   [COLORS.ORANGE]: "☼",
+//   [COLORS.BLUE]: "💧",
+// };
 
 export const INITIAL_GRID: COLORS[][] = [
   [COLORS.PINK, COLORS.ORANGE, COLORS.PINK],

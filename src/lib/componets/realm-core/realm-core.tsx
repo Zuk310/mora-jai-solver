@@ -1,6 +1,6 @@
 import React from "react";
-import { Container, RealmIconWrapper } from "./realm-core.styles";
-import { COLORS, REALM_SHAPES } from "../../constants";
+import { Container, InnerCircle } from "./realm-core.styles";
+import { COLORS } from "../../constants";
 
 interface RealmCoreProps {
   corner: "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
@@ -19,7 +19,7 @@ const RealmCore: React.FC<RealmCoreProps> = ({
       onClick={onClick}
       title={`Target: ${targetColor}`}
     >
-      <RealmIconWrapper>{REALM_SHAPES[targetColor]}</RealmIconWrapper>
+      <InnerCircle color={targetColor} />
     </Container>
   );
 };
