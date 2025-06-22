@@ -395,7 +395,7 @@ const Solver: React.FC = () => {
                   <b>Grey:</b> Does nothing.
                 </GuideListItem>
                 <GuideListItem>
-                  <b>Black:</b> Shifts its row left.
+                  <b>Black:</b> Shifts its row right.
                 </GuideListItem>
                 <GuideListItem>
                   <b>Green:</b> Swaps with the opposite tile.
