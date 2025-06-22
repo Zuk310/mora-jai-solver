@@ -83,11 +83,22 @@ export const Container = styled.div<{
   }}
 `;
 
-export const InnerCircle = styled.div<{ color: COLORS }>`
+export const InnerCircle = styled.div<{
+  color: COLORS;
+  $isEditingMode?: boolean;
+}>`
   width: ${INNER_CIRCLE_SIZE};
   height: ${INNER_CIRCLE_SIZE};
 
   background-color: ${({ color }) => getBackgroundColor(color)};
   border-radius: 50%;
   border: 2px solid rgba(0, 0, 0, 0.2);
+
+  ${({ $isEditingMode }) =>
+    $isEditingMode &&
+    css`
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+    `}
+
+  transition: all 0.2s ease-out;
 `;

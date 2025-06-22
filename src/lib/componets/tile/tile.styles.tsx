@@ -99,9 +99,13 @@ export const StyledTile = styled.button<{
     css`
       cursor: pointer;
       border-style: dashed;
+      border-width: 2px;
       border-color: rgba(255, 255, 255, 0.3);
       &:hover {
         border-color: rgba(255, 255, 255, 0.5);
       }
     `}
+
+  transition: background-color 0.3s ease, transform 0.2s ease-out, 
+    box-shadow 0.2s ease-out, border-color 0.2s ease, border-width 0.2s ease;
 `;

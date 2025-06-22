@@ -1,13 +1,130 @@
 import { COLORS, TileCoords } from "../constants";
-import {
-  deepCopyGrid,
-  COORDS_TO_INDEX,
-  ALL_AROUND_COORDS_LOOKUP,
-  CROSS_AROUND_COORDS_LOOKUP,
-} from "./solver";
+import { deepCopyGrid } from "./solver";
 
 const GRID_SIZE = 3;
 const CENTER_COORD = 1;
+
+const COORDS_TO_INDEX: { [key: string]: number } = {
+  "0,0": 0,
+  "0,1": 1,
+  "0,2": 2,
+  "1,0": 3,
+  "1,1": 4,
+  "1,2": 5,
+  "2,0": 6,
+  "2,1": 7,
+  "2,2": 8,
+};
+
+const ALL_AROUND_COORDS_LOOKUP: TileCoords[][] = [
+  [
+    { r: 0, c: 1 },
+    { r: 1, c: 1 },
+    { r: 1, c: 0 },
+  ],
+  [
+    { r: 0, c: 2 },
+    { r: 1, c: 2 },
+    { r: 2, c: 2 },
+    { r: 2, c: 1 },
+    { r: 2, c: 0 },
+    { r: 1, c: 0 },
+    { r: 0, c: 0 },
+  ],
+  [
+    { r: 1, c: 2 },
+    { r: 2, c: 2 },
+    { r: 2, c: 1 },
+    { r: 1, c: 1 },
+    { r: 0, c: 1 },
+  ],
+  [
+    { r: 0, c: 0 },
+    { r: 0, c: 1 },
+    { r: 1, c: 1 },
+    { r: 2, c: 1 },
+    { r: 2, c: 0 },
+  ],
+  [
+    { r: 0, c: 0 },
+    { r: 0, c: 1 },
+    { r: 0, c: 2 },
+    { r: 1, c: 2 },
+    { r: 2, c: 2 },
+    { r: 2, c: 1 },
+    { r: 2, c: 0 },
+    { r: 1, c: 0 },
+  ],
+  [
+    { r: 2, c: 2 },
+    { r: 2, c: 1 },
+    { r: 1, c: 1 },
+    { r: 0, c: 1 },
+    { r: 0, c: 2 },
+  ],
+  [
+    { r: 1, c: 0 },
+    { r: 1, c: 1 },
+    { r: 2, c: 1 },
+  ],
+  [
+    { r: 2, c: 0 },
+    { r: 1, c: 0 },
+    { r: 1, c: 1 },
+    { r: 1, c: 2 },
+    { r: 2, c: 2 },
+  ],
+  [
+    { r: 1, c: 2 },
+    { r: 1, c: 1 },
+    { r: 2, c: 1 },
+  ],
+];
+
+const CROSS_AROUND_COORDS_LOOKUP: TileCoords[][] = [
+  [
+    { r: 0, c: 1 },
+    { r: 1, c: 0 },
+  ],
+  [
+    { r: 0, c: 0 },
+    { r: 0, c: 2 },
+    { r: 1, c: 1 },
+  ],
+  [
+    { r: 0, c: 1 },
+    { r: 1, c: 2 },
+  ],
+  [
+    { r: 0, c: 0 },
+    { r: 1, c: 1 },
+    { r: 2, c: 0 },
+  ],
+  [
+    { r: 0, c: 1 },
+    { r: 1, c: 0 },
+    { r: 1, c: 2 },
+    { r: 2, c: 1 },
+  ],
+  [
+    { r: 0, c: 2 },
+    { r: 1, c: 1 },
+    { r: 2, c: 2 },
+  ],
+  [
+    { r: 1, c: 0 },
+    { r: 2, c: 1 },
+  ],
+  [
+    { r: 1, c: 1 },
+    { r: 2, c: 0 },
+    { r: 2, c: 2 },
+  ],
+  [
+    { r: 1, c: 2 },
+    { r: 2, c: 1 },
+  ],
+];
 
 export const applyTileEffect = (
   currentGrid: COLORS[][],
