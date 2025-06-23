@@ -16,7 +16,7 @@ _A preview of the Mora Jai Puzzle Solver interface._
 
 This project is a dedicated tool for players of the game _Blue Prince_. It provides an interface to replicate any in-game Mora Jai puzzle and uses an intelligent **A\* (A-star) search algorithm** to find the most optimal solution.
 
-By running the solver in a background thread, the application remains perfectly responsive even when tackling the most complex puzzles. The application is designed not only to be functional but also to match the beautiful, dark, and magical aesthetic of the game itself, providing a seamless experience for players.
+By running the solver in a background thread, the application remains perfectly responsive even when tackling the most complex puzzles.
 
 ## ✨ Features
 
