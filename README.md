@@ -1,6 +1,6 @@
 # 🧩 Mora Jai Puzzle Solver
 
-A web-based, high-performance solver for the Mora Jai puzzles from the game **[Blue Prince](https://store.steampowered.com/app/1528630/Blue_Prince/)**.
+A web-based, high-performance solver for the Mora Jai puzzles from the game **[Blue Prince](https://store.steampowered.com/app/1569580/Blue_Prince/)**.
 
 ![Next.js](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
