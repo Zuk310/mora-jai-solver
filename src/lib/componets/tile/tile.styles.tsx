@@ -19,7 +19,7 @@ const getBorderColor = (color: string | undefined) => {
     case COLORS.YELLOW:
       return "rgb(180, 133, 7)";
     case COLORS.VIOLET:
-      return "rgb(79, 70, 229)";
+      return "rgb(65, 12, 74)";
     case COLORS.WHITE:
       return "rgb(209, 213, 219)";
     case COLORS.RED:
@@ -61,7 +61,7 @@ export const StyledTile = styled.button<{
       case COLORS.YELLOW:
         return "rgb(251, 191, 36)";
       case COLORS.VIOLET:
-        return "rgb(99, 102, 241)";
+        return "rgb(120,36,134)";
       case COLORS.WHITE:
         return "rgb(243, 244, 246)";
       case COLORS.RED:

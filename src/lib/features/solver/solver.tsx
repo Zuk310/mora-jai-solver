@@ -521,7 +521,7 @@ const Solver: React.FC = () => {
                 $variant="edit"
                 $isActive={editingMode}
                 onClick={toggleEditingMode}
-                disabled={solving}
+                disabled={solving || solveOverlay}
               >
                 {editingMode ? "Exit Edit Mode" : "Edit puzzle"}
               </StyledButton>
@@ -538,14 +538,14 @@ const Solver: React.FC = () => {
               </StyledButton>
               <StyledButton
                 $variant="reset"
-                disabled={editingMode || solving}
+                disabled={editingMode || solving || solveOverlay}
                 onClick={handleReset}
               >
                 Reset
               </StyledButton>
               <StyledButton
                 $variant="clear"
-                disabled={editingMode || solving}
+                disabled={editingMode || solving || solveOverlay}
                 onClick={handleClearAll}
               >
                 Clear All

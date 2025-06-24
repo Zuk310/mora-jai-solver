@@ -15,11 +15,11 @@ const getBackgroundColor = (color: string) => {
     case COLORS.GREEN:
       return "rgb(5, 150, 105)";
     case COLORS.PINK:
-      return "rgb(236, 72, 153)";
+      return "rgb(218,135,225)";
     case COLORS.YELLOW:
       return "rgb(251, 191, 36)";
     case COLORS.VIOLET:
-      return "rgb(99, 102, 241)";
+      return "rgb(120,36,134)";
     case COLORS.WHITE:
       return "rgb(243, 244, 246)";
     case COLORS.RED:
