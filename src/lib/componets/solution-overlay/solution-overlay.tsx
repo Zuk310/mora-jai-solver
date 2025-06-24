@@ -34,10 +34,12 @@ const SolutionOverlay: React.FC<SolverStepsOverlayProps> = ({
 
             return (
               <Tile key={`${r}-${c}`}>
-                {steps && (
+                {steps ? (
                   <span>
                     {steps.length === 1 ? `${steps[0]}` : steps.join(", ")}
                   </span>
+                ) : (
+                  <>&nbsp;</>
                 )}
               </Tile>
             );
