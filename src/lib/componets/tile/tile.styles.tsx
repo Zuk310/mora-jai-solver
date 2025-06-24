@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
-import { getContrastTextColor } from "../../utils/styles";
+import { getContrastTextColor } from "../../styles/styles";
 
 const FOCUS_SHADOW_COLOR = "#0a84ff";
 

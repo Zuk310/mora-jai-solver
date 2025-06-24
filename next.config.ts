@@ -36,7 +36,6 @@ const nextConfig: NextConfig = {
   },
   basePath: "/mora-jai-solver",
   assetPrefix: "/mora-jai-solver/",
-  output: "export",
   images: {
     unoptimized: true,
   },

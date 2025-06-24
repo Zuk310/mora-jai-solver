@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { COLORS } from "../../constants";
-import { getContrastTextColor } from "../../utils/styles";
+import { getContrastTextColor } from "../../styles/styles";
 
 const PICKER_WIDTH = "220px";
 const BUTTON_BORDER_RADIUS = "8px";
