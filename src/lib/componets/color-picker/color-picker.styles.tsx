@@ -52,7 +52,7 @@ export const Button = styled.button<{ color: COLORS }>`
       case COLORS.YELLOW:
         return "rgb(251, 191, 36)";
       case COLORS.VIOLET:
-        return "rgb(99, 102, 241)";
+        return "rgb(120,36,134)";
       case COLORS.WHITE:
         return "rgb(255, 255, 255)";
       case COLORS.RED:
