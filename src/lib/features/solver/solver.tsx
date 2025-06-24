@@ -1,25 +1,34 @@
+import { Footer } from "@mora-jai/lib/componets";
+import ColorPicker from "@mora-jai/lib/componets/color-picker/color-picker";
+import GuideModal from "@mora-jai/lib/componets/guide-modal/guide-modal";
+import RealmCore from "@mora-jai/lib/componets/realm-core/realm-core";
+import SolutionOverlay from "@mora-jai/lib/componets/solution-overlay/solution-overlay";
+import Tile from "@mora-jai/lib/componets/tile/tile";
+import { useMediaQuery } from "@mora-jai/lib/hooks";
+import {
+  deepCopyGrid,
+  RealmColors,
+  SolverResult,
+} from "@mora-jai/lib/utils/solver";
+import { applyTileEffect } from "@mora-jai/lib/utils/tiles";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import ColorPicker from "../../componets/color-picker/color-picker";
-import RealmCore from "../../componets/realm-core/realm-core";
-import SolutionOverlay from "@mora-jai/lib/componets/solution-overlay/solution-overlay";
-import Tile from "../../componets/tile/tile";
-import GuideModal from "../../componets/guide-modal/guide-modal";
 import { FaQuestionCircle } from "react-icons/fa";
-import { COLORS, INITIAL_GRID, TARGET_REALM_COLORS } from "../../constants";
-import { deepCopyGrid, SolverResult } from "../../utils/solver";
-import { applyTileEffect } from "../../utils/tiles";
+import { COLORS } from "../../constants";
 import {
   ButtonContainer,
   CenterColumn,
   Container,
   ControlsMessage,
+  GlobalStyle,
   GridContainer,
   GuideList,
   GuideListContainer,
   GuideListItem,
   GuideListTitle,
   GuideText,
+  Header,
+  HelpButton,
   InfoGroup,
   MessageArea,
   MessageText,
@@ -29,12 +38,7 @@ import {
   Subtitle,
   Title,
   Wrapper,
-  Header,
-  HelpButton,
-  GlobalStyle, // Import GlobalStyle
 } from "./solver.styles";
-import { Footer } from "@mora-jai/lib/componets";
-import { useMediaQuery } from "@mora-jai/lib/hooks";
 
 const SOLUTION_RESET_DELAY = 100;
 const MESSAGE_VISIBILITY_DURATION = 3000;
@@ -67,13 +71,19 @@ interface ColorPickerState {
   position: { top: number; left: number };
 }
 
-const Solver: React.FC = () => {
+export interface SolverProps {
+  initialGrid: COLORS[][];
+  targetRealmColors: RealmColors;
+}
+
+const Solver: React.FC<SolverProps> = (props: SolverProps) => {
+  const { initialGrid, targetRealmColors } = props;
   const workerRef = useRef<Worker | null>(null);
   const [isGuideVisible, setIsGuideVisible] = useState(false);
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
-  const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
-  const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
+  const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(initialGrid));
+  const [realmColors, setRealmColors] = useState(targetRealmColors);
   const [solveOverlay, setSolveOverlay] = useState<boolean>(false);
   const [solutionSteps, setSolutionSteps] = useState<SolutionStep[]>([]);
   const [solving, setSolving] = useState<boolean>(false);
@@ -86,8 +96,8 @@ const Solver: React.FC = () => {
   const [colorPicker, setColorPicker] = useState<ColorPickerState | null>(null);
   const [lastUserProvidedState, setLastUserProvidedState] =
     useState<SavedState>({
-      grid: deepCopyGrid(INITIAL_GRID),
-      realmColors: { ...TARGET_REALM_COLORS },
+      grid: deepCopyGrid(initialGrid),
+      realmColors: { ...targetRealmColors },
     });
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 

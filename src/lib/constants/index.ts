@@ -25,24 +25,6 @@ export enum COLORS {
 //   [COLORS.BLUE]: "💧",
 // };
 
-export const INITIAL_GRID: COLORS[][] = [
-  [COLORS.PINK, COLORS.ORANGE, COLORS.PINK],
-  [COLORS.ORANGE, COLORS.BLUE, COLORS.ORANGE],
-  [COLORS.PINK, COLORS.ORANGE, COLORS.PINK],
-];
-
-export const TARGET_REALM_COLORS: {
-  topLeft: COLORS;
-  topRight: COLORS;
-  bottomLeft: COLORS;
-  bottomRight: COLORS;
-} = {
-  topLeft: COLORS.ORANGE,
-  topRight: COLORS.ORANGE,
-  bottomLeft: COLORS.ORANGE,
-  bottomRight: COLORS.ORANGE,
-};
-
 export interface TileCoords {
   r: number;
   c: number;
