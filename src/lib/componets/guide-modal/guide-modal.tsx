@@ -23,7 +23,13 @@ const GuideModal: React.FC<GuideModalProps> = ({ isVisible, onClose }) => {
     <AnimatePresence>
       {isVisible && (
         <ModalOverlay
-          initial={{ opacity: 0, pointerEvents: "none", y: 10, x: "-50%" }}
+          initial={{
+            opacity: 0,
+            pointerEvents: "none",
+            y: 10,
+            left: "50%",
+            x: "-50%",
+          }}
           animate={{ opacity: 1, pointerEvents: "auto", y: 0 }}
           exit={{ opacity: 0, pointerEvents: "none", y: -10 }}
           onClick={onClose}

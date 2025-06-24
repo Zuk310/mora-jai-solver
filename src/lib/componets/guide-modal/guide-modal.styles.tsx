@@ -4,7 +4,6 @@ import styled from "styled-components";
 export const ModalOverlay = styled(motion.div)`
   z-index: 1000;
   position: fixed;
-  top: 0;
 
   width: calc(100% - 40px);
   max-width: 600px;
@@ -15,8 +14,6 @@ export const ModalOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-
-  transform: translateX(-50%);
 
   ::-webkit-scrollbar {
     display: none;
@@ -53,6 +50,10 @@ export const CloseButton = styled.button`
   border: none;
   color: #8e8e93;
   font-size: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     color: #fff;
