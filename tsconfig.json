@@ -17,6 +17,11 @@
       "@mora-jai/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/lib/hooks/use-media-query"
+  ],
   "exclude": ["node_modules"]
 }

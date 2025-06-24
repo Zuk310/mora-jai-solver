@@ -4,6 +4,8 @@ import ColorPicker from "../../componets/color-picker/color-picker";
 import RealmCore from "../../componets/realm-core/realm-core";
 import SolutionOverlay from "@mora-jai/lib/componets/solution-overlay/solution-overlay";
 import Tile from "../../componets/tile/tile";
+import GuideModal from "../../componets/guide-modal/guide-modal";
+import { FaQuestionCircle } from "react-icons/fa";
 import { COLORS, INITIAL_GRID, TARGET_REALM_COLORS } from "../../constants";
 import { deepCopyGrid, SolverResult } from "../../utils/solver";
 import { applyTileEffect } from "../../utils/tiles";
@@ -27,8 +29,12 @@ import {
   Subtitle,
   Title,
   Wrapper,
+  Header,
+  HelpButton,
+  GlobalStyle, // Import GlobalStyle
 } from "./solver.styles";
 import { Footer } from "@mora-jai/lib/componets";
+import { useMediaQuery } from "@mora-jai/lib/hooks";
 
 const SOLUTION_RESET_DELAY = 100;
 const MESSAGE_VISIBILITY_DURATION = 3000;
@@ -63,6 +69,8 @@ interface ColorPickerState {
 
 const Solver: React.FC = () => {
   const workerRef = useRef<Worker | null>(null);
+  const [isGuideVisible, setIsGuideVisible] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 1024px)");
 
   const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(INITIAL_GRID));
   const [realmColors, setRealmColors] = useState(TARGET_REALM_COLORS);
@@ -149,13 +157,13 @@ const Solver: React.FC = () => {
         type: ColorPickerType;
         corner?: Corner;
         cornerSide?: "left" | "right";
-      }
+      },
+      isMobile: boolean
     ): { top: number; left: number } => {
       const COLOR_PICKER_WIDTH = 220;
       const COLOR_PICKER_HEIGHT = 140;
       const GAP = 5;
       const BOTTOM_GAP = 72;
-
       const CORNER_HORIZONTAL_ADJUST = 50;
 
       const { isBottomElement, type, corner } = options;
@@ -165,12 +173,15 @@ const Solver: React.FC = () => {
       const elementBottomY = rect.bottom;
 
       let left = elementCenterX - puzzleRect.left - COLOR_PICKER_WIDTH / 2;
-
       let top: number;
-      if (isBottomElement) {
-        const gap = BOTTOM_GAP + GAP;
 
-        top = elementTopY - puzzleRect.top - COLOR_PICKER_HEIGHT - gap;
+      if (isBottomElement) {
+        top =
+          elementTopY -
+          puzzleRect.top -
+          COLOR_PICKER_HEIGHT -
+          GAP -
+          (isMobile ? 0 : BOTTOM_GAP);
       } else {
         top = elementBottomY - puzzleRect.top + GAP;
       }
@@ -181,6 +192,24 @@ const Solver: React.FC = () => {
           ? CORNER_HORIZONTAL_ADJUST
           : -CORNER_HORIZONTAL_ADJUST;
         left += horizontalAdjust;
+      }
+
+      if (isMobile && typeof window !== "undefined") {
+        const screenPadding = 10;
+        const pickerRightEdge = puzzleRect.left + left + COLOR_PICKER_WIDTH;
+
+        if (pickerRightEdge > window.innerWidth - screenPadding) {
+          left =
+            window.innerWidth -
+            puzzleRect.left -
+            COLOR_PICKER_WIDTH -
+            screenPadding;
+        }
+
+        const pickerLeftEdge = puzzleRect.left + left;
+        if (pickerLeftEdge < screenPadding) {
+          left = screenPadding - puzzleRect.left;
+        }
       }
 
       return { top, left };
@@ -196,17 +225,14 @@ const Solver: React.FC = () => {
 
         if (!puzzleRect) return;
 
-        const position = calculateColorPickerPosition(rect, puzzleRect, {
-          isBottomElement: row === 2,
-          type: "tile",
-        });
+        const position = calculateColorPickerPosition(
+          rect,
+          puzzleRect,
+          { isBottomElement: row === 2, type: "tile" },
+          isMobile
+        );
 
-        setColorPicker({
-          type: "tile",
-          row,
-          col,
-          position,
-        });
+        setColorPicker({ type: "tile", row, col, position });
       } else {
         if (solving) return;
         setGrid((prevGrid) => {
@@ -218,7 +244,13 @@ const Solver: React.FC = () => {
         resetPuzzleState();
       }
     },
-    [editingMode, solving, calculateColorPickerPosition, resetPuzzleState]
+    [
+      editingMode,
+      solving,
+      calculateColorPickerPosition,
+      resetPuzzleState,
+      isMobile,
+    ]
   );
 
   const handleRealmCoreClick = useCallback(
@@ -229,16 +261,20 @@ const Solver: React.FC = () => {
       if (editingMode) {
         const rect = event.currentTarget.getBoundingClientRect();
         const puzzleRect = puzzleContainerRef.current?.getBoundingClientRect();
-
         const isBottom = corner === "bottomLeft" || corner === "bottomRight";
 
         if (!puzzleRect) return;
-        const position = calculateColorPickerPosition(rect, puzzleRect, {
-          isBottomElement: isBottom,
-          type: "corner",
-          cornerSide: corner.includes("Left") ? "left" : "right",
-          corner,
-        });
+        const position = calculateColorPickerPosition(
+          rect,
+          puzzleRect,
+          {
+            isBottomElement: isBottom,
+            type: "corner",
+            cornerSide: corner.includes("Left") ? "left" : "right",
+            corner,
+          },
+          isMobile
+        );
         setColorPicker({ type: "realm", corner, position });
       } else {
         if (solving) return;
@@ -248,9 +284,7 @@ const Solver: React.FC = () => {
           bottomLeft: { row: 2, col: 0 },
           bottomRight: { row: 2, col: 2 },
         };
-
         const { row: adjacentRow, col: adjacentCol } = adjacentCoords[corner];
-
         if (grid[adjacentRow][adjacentCol] !== realmColors[corner]) {
           setGrid(deepCopyGrid(lastUserProvidedState.grid));
           setRealmColors({ ...lastUserProvidedState.realmColors });
@@ -273,6 +307,7 @@ const Solver: React.FC = () => {
       lastUserProvidedState,
       calculateColorPickerPosition,
       resetPuzzleState,
+      isMobile,
     ]
   );
 
@@ -376,56 +411,65 @@ const Solver: React.FC = () => {
 
   return (
     <Wrapper>
-      <Title>Mora Jai Puzzle Solver</Title>
+      <GlobalStyle />
+      <GuideModal
+        isVisible={isGuideVisible}
+        onClose={() => setIsGuideVisible(false)}
+      />
+      <Header>
+        <Title>Mora Jai Puzzle Solver</Title>
+      </Header>
       <Container>
-        <SideContainer>
-          <InfoGroup>
-            <Subtitle>Guide</Subtitle>
-            <GuideText>
-              The objective of the Mora Jai Puzzle is to match the colors of the
-              four corner tiles on the 3x3 grid with their respective corner
-              colors.
-            </GuideText>
-          </InfoGroup>
-          <InfoGroup>
-            <GuideListContainer>
-              <GuideListTitle>Colors Mechanics:</GuideListTitle>
-              <GuideList>
-                <GuideListItem>
-                  <b>Grey:</b> Does nothing.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Black:</b> Shifts its row right.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Green:</b> Swaps with the opposite tile.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Pink:</b> Rotates neighboring tiles clockwise.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Yellow:</b> Swaps with the tile above.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Violet:</b> Swaps with the tile below.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>White:</b> Turns adjacent gray tiles white; if none, turns
-                  itself gray.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Red:</b> White becomes Black; Black becomes Red.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Orange:</b> Becomes the majority color of its neighbors.
-                </GuideListItem>
-                <GuideListItem>
-                  <b>Blue:</b> Triggers the center tile effect.
-                </GuideListItem>
-              </GuideList>
-            </GuideListContainer>
-          </InfoGroup>
-        </SideContainer>
+        {!isMobile && (
+          <SideContainer>
+            <InfoGroup>
+              <Subtitle>Guide</Subtitle>
+              <GuideText>
+                The objective of the Mora Jai Puzzle is to match the colors of
+                the four corner tiles on the 3x3 grid with their respective
+                corner colors.
+              </GuideText>
+            </InfoGroup>
+            <InfoGroup>
+              <GuideListContainer>
+                <GuideListTitle>Colors Mechanics:</GuideListTitle>
+                <GuideList>
+                  <GuideListItem>
+                    <b>Grey:</b> Does nothing.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Black:</b> Shifts its row right.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Green:</b> Swaps with the opposite tile.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Pink:</b> Rotates neighboring tiles clockwise.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Yellow:</b> Swaps with the tile above.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Violet:</b> Swaps with the tile below.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>White:</b> Turns adjacent gray tiles white; if none,
+                    turns itself gray.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Red:</b> White becomes Black; Black becomes Red.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Orange:</b> Becomes the majority color of its neighbors.
+                  </GuideListItem>
+                  <GuideListItem>
+                    <b>Blue:</b> Triggers the center tile effect.
+                  </GuideListItem>
+                </GuideList>
+              </GuideListContainer>
+            </InfoGroup>
+          </SideContainer>
+        )}
         <CenterColumn>
           <PuzzleContainer ref={puzzleContainerRef} $isSolving={solving}>
             <RealmCore
@@ -512,6 +556,14 @@ const Solver: React.FC = () => {
         <SideContainer>
           <InfoGroup>
             <Subtitle>Puzzle Controls</Subtitle>
+            {isMobile && (
+              <HelpButton
+                onClick={() => setIsGuideVisible(true)}
+                aria-label="Show guide"
+              >
+                <FaQuestionCircle />
+              </HelpButton>
+            )}
             <ControlsMessage>
               Use the controls below to <b>edit</b> the puzzle, <b>solve</b> it,{" "}
               <b>reset it to last edit</b> or <b>clear all</b> tiles.
@@ -521,7 +573,7 @@ const Solver: React.FC = () => {
                 $variant="edit"
                 $isActive={editingMode}
                 onClick={toggleEditingMode}
-                disabled={solving || solveOverlay}
+                disabled={solving}
               >
                 {editingMode ? "Exit Edit Mode" : "Edit puzzle"}
               </StyledButton>
@@ -538,14 +590,14 @@ const Solver: React.FC = () => {
               </StyledButton>
               <StyledButton
                 $variant="reset"
-                disabled={editingMode || solving || solveOverlay}
+                disabled={editingMode || solving}
                 onClick={handleReset}
               >
                 Reset
               </StyledButton>
               <StyledButton
                 $variant="clear"
-                disabled={editingMode || solving || solveOverlay}
+                disabled={editingMode || solving}
                 onClick={handleClearAll}
               >
                 Clear All
