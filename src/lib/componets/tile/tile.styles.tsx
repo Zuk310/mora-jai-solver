@@ -2,9 +2,13 @@ import styled, { css } from "styled-components";
 import { COLORS } from "../../constants";
 import { getContrastTextColor } from "../../utils/styles";
 
-const TILE_SIZE = "140px";
-const TILE_BORDER_RADIUS = "12px";
 const FOCUS_SHADOW_COLOR = "#0a84ff";
+
+const tileSizes = {
+  desktop: { size: "140px", radius: "12px", font: "26px" },
+  tablet: { size: "110px", radius: "10px", font: "22px" },
+  mobile: { size: "80px", radius: "8px", font: "18px" },
+};
 
 const getBorderColor = (color: string | undefined) => {
   switch (color) {
@@ -40,10 +44,7 @@ export const StyledTile = styled.button<{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${TILE_SIZE};
-  height: ${TILE_SIZE};
 
-  font-size: 26px;
   font-weight: 700;
   text-align: center;
   color: ${({ color }) => getContrastTextColor(color)};
@@ -61,7 +62,7 @@ export const StyledTile = styled.button<{
       case COLORS.YELLOW:
         return "rgb(251, 191, 36)";
       case COLORS.VIOLET:
-        return "rgb(120,36,134)";
+        return " rgb(120,36,134)";
       case COLORS.WHITE:
         return "rgb(243, 244, 246)";
       case COLORS.RED:
@@ -74,14 +75,14 @@ export const StyledTile = styled.button<{
         return "white";
     }
   }};
-
   border: 1px solid ${({ color }) => getBorderColor(color)};
-  border-radius: ${TILE_BORDER_RADIUS};
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
     inset 0 1px 1px rgba(255, 255, 255, 0.05);
 
-  transition: background-color 0.3s ease, transform 0.2s ease-out,
-    box-shadow 0.2s ease-out;
+  width: ${tileSizes.desktop.size};
+  height: ${tileSizes.desktop.size};
+  font-size: ${tileSizes.desktop.font};
+  border-radius: ${tileSizes.desktop.radius};
 
   &:hover {
     z-index: 5;
@@ -106,6 +107,19 @@ export const StyledTile = styled.button<{
       }
     `}
 
-  transition: background-color 0.3s ease, transform 0.2s ease-out, 
-    box-shadow 0.2s ease-out, border-color 0.2s ease, border-width 0.2s ease;
+  @media (max-width: 1024px) {
+    width: ${tileSizes.tablet.size};
+    height: ${tileSizes.tablet.size};
+    font-size: ${tileSizes.tablet.font};
+    border-radius: ${tileSizes.tablet.radius};
+  }
+
+  @media (max-width: 480px) {
+    width: ${tileSizes.mobile.size};
+    height: ${tileSizes.mobile.size};
+    font-size: ${tileSizes.mobile.font};
+    border-radius: ${tileSizes.mobile.radius};
+  }
+
+  transition: all 0.2s ease-out;
 `;

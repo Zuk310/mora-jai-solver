@@ -1,12 +1,7 @@
 import styled from "styled-components";
 
-const OVERLAY_GRID_SIZE = "492px";
-const OVERLAY_TILE_SIZE = "140px";
-const OVERLAY_GRID_ROW_GAP = "10px";
-const OVERLAY_GRID_COL_GAP = "16px";
-const OVERLAY_GRID_PADDING = "14px 20px 17px 20px";
-
 export const Overlay = styled.div<{ $isVisible: boolean }>`
+  overflow: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -14,8 +9,11 @@ export const Overlay = styled.div<{ $isVisible: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
+
   width: 100%;
   height: 100%;
+  padding: inherit;
+  box-sizing: border-box;
 
   background-color: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(5px);
@@ -23,7 +21,15 @@ export const Overlay = styled.div<{ $isVisible: boolean }>`
 
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   pointer-events: ${({ $isVisible }) => ($isVisible ? "auto" : "none")};
-  overflow: hidden;
+
+  @media (max-width: 1024px) {
+    border-radius: 20px;
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 16px;
+  }
+
   transition: opacity 0.3s ease-in-out;
 `;
 
@@ -33,32 +39,42 @@ export const Grid = styled.div`
   justify-items: center;
   align-items: center;
 
-  width: ${OVERLAY_GRID_SIZE};
-  height: ${OVERLAY_GRID_SIZE};
-  row-gap: ${OVERLAY_GRID_ROW_GAP};
-  column-gap: ${OVERLAY_GRID_COL_GAP};
-  padding: ${OVERLAY_GRID_PADDING};
-
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
+
+  gap: 12px;
+  border-radius: 16px;
+
+  @media (max-width: 1024px) {
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+    border-radius: 8px;
+  }
 `;
 
 export const Tile = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${OVERLAY_TILE_SIZE};
-  height: ${OVERLAY_TILE_SIZE};
-  padding: 8px;
+
+  width: 100%;
+  height: 100%;
 
   color: white;
-  font-size: 30px;
   font-weight: 700;
   text-align: center;
-
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
+
+  padding: 8px;
   box-sizing: border-box;
+
+  font-size: 30px;
+  border-radius: 12px;
 
   span {
     display: flex;
@@ -66,12 +82,10 @@ export const Tile = styled.div`
     justify-content: center;
 
     max-width: 100%;
-    padding: 8px 12px;
 
     color: #fff;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
       Helvetica, Arial, sans-serif;
-    font-size: 18px;
     font-weight: 600;
     line-height: 1.4;
     text-align: center;
@@ -79,7 +93,30 @@ export const Tile = styled.div`
 
     background-color: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+
+    padding: 8px 12px;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+
+  @media (max-width: 1024px) {
+    border-radius: 10px;
+    font-size: 24px;
+    span {
+      font-size: 16px;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 8px;
+    font-size: 18px;
+    span {
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
   }
 `;

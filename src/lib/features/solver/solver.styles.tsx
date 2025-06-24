@@ -1,15 +1,19 @@
-import styled, { css, keyframes } from "styled-components";
+import styled, { css, keyframes, createGlobalStyle } from "styled-components";
+
+export const GlobalStyle = createGlobalStyle`
+  button, a, div {
+    -webkit-tap-highlight-color: transparent;
+  }
+`;
 
 const Z_INDEX_PUZZLE = 10;
 const FONT_STACK_SYSTEM = `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`;
+const MOBILE_BREAKPOINT = "1024px";
+const SMALL_MOBILE_BREAKPOINT = "480px";
 
 const pulse = keyframes`
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 `;
 
 const getButtonStyles = (variant?: string, isActive?: boolean) => {
@@ -30,7 +34,6 @@ const getButtonStyles = (variant?: string, isActive?: boolean) => {
     color: #f2f2f7;
 
     background-color: #2c2c2e;
-
     border: 1px solid transparent;
     border-radius: 8px;
 
@@ -88,94 +91,181 @@ const getButtonStyles = (variant?: string, isActive?: boolean) => {
 };
 
 export const Wrapper = styled.div`
-  height: 100vh;
+  overflow-y: hidden;
+
+  min-height: 100vh;
   width: 100%;
-  overflow: hidden;
+
   box-sizing: border-box;
 
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-
-  padding-top: 5vh;
-  box-sizing: border-box;
 
   background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
   font-family: ${FONT_STACK_SYSTEM};
 `;
 
-export const Container = styled.div`
+export const Header = styled.header`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: 64px;
+  gap: 16px;
 
-  width: 100%;
-  max-width: 1400px;
-  padding: 0 24px;
+  padding: 5vh 0 0 0;
+  margin-bottom: 90px;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    margin-bottom: 69px;
+    padding-top: 30px;
+  }
 `;
 
 export const Title = styled.h1`
-  margin-bottom: 90px;
+  margin: 0;
 
   font-size: 36px;
   font-weight: 700;
   color: #fff;
   text-align: center;
   letter-spacing: -0.025em;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    font-size: 24px;
+  }
+`;
+
+export const HelpButton = styled.button`
+  cursor: pointer;
+
+  position: absolute;
+  top: 22px;
+  right: 22px;
+
+  background: none;
+  border: none;
+
+  color: #8e8e93;
+  font-size: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:hover {
+    color: #fff;
+    transform: scale(1.1);
+  }
+
+  transition: color 0.2s ease, transform 0.2s ease;
+`;
+
+export const Container = styled.main`
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 64px;
+  flex: 1;
+
+  width: 100%;
+  max-width: 1200px;
+
+  margin: 0 auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px;
+  }
 `;
 
 export const PuzzleContainer = styled.div<{ $isSolving?: boolean }>`
   position: relative;
   z-index: ${Z_INDEX_PUZZLE};
 
-  width: 540px;
-  height: 540px;
-  padding: 24px;
-  box-sizing: border-box;
-
   background: rgba(18, 18, 18, 0.75);
   backdrop-filter: blur(16px);
-
   border: 1px solid rgba(255, 255, 255, 0.1);
+
+  width: 476px;
+  height: 476px;
+
+  padding: 16px;
+  box-sizing: border-box;
+
   border-radius: 24px;
+
+  opacity: ${({ $isSolving }) => ($isSolving ? 0.5 : 1)};
+  pointer-events: ${({ $isSolving }) => ($isSolving ? "none" : "auto")};
 
   &:hover {
     border-color: rgba(255, 255, 255, 0.2);
   }
 
-  opacity: ${({ $isSolving }) => ($isSolving ? 0.5 : 1)};
-  pointer-events: ${({ $isSolving }) => ($isSolving ? "none" : "auto")};
-  transition: opacity 0.2s ease;
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    width: 374px;
+    height: 374px;
+    padding: 12px;
+    border-radius: 20px;
+  }
 
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  @media (max-width: ${SMALL_MOBILE_BREAKPOINT}) {
+    width: 272px;
+    height: 272px;
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 `;
 
 export const GridContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
-  justify-items: center;
-  gap: 12px;
+  justify-content: center;
 
   width: 100%;
   height: 100%;
-  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+
   box-sizing: border-box;
 
-  background: rgba(0, 0, 0, 0.2);
+  gap: 12px;
   border-radius: 16px;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  @media (max-width: ${SMALL_MOBILE_BREAKPOINT}) {
+    gap: 8px;
+    border-radius: 8px;
+  }
 `;
 
-export const SideContainer = styled.div`
+export const SideContainer = styled.aside`
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 24px;
 
+  gap: 24px;
   width: 300px;
-  min-width: 300px;
+  flex-shrink: 0;
+
+  @media (max-width: ${MOBILE_BREAKPOINT}) {
+    width: 100%;
+    max-width: 374px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: ${SMALL_MOBILE_BREAKPOINT}) {
+    max-width: 272px;
+  }
 `;
 
 export const InfoGroup = styled.div`
@@ -184,7 +274,6 @@ export const InfoGroup = styled.div`
   gap: 16px;
 
   padding: 24px;
-
   background: rgba(18, 18, 18, 0.75);
   backdrop-filter: blur(16px);
 
@@ -200,7 +289,7 @@ export const InfoGroup = styled.div`
     border-color 0.2s ease-out;
 `;
 
-export const CenterColumn = styled.div<{ $isSolving?: boolean }>`
+export const CenterColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -300,13 +389,12 @@ export const MessageText = styled.p<{
   border: 1px solid transparent;
   border-radius: 8px;
 
-  animation: ${({ $isSolving }) => {
-    return $isSolving
+  animation: ${({ $isSolving }) =>
+    $isSolving
       ? css`
           ${pulse} 2s infinite ease-in-out
         `
-      : "none";
-  }};
+      : "none"};
 
   ${({ $status }) => {
     if ($status === "good")
