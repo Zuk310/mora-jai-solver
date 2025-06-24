@@ -1,31 +1,25 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { GetServerSideProps } from "next";
+import { INITIAL_GRID, TARGET_REALM_COLORS } from "../lib/constants";
 import Solver from "../lib/features/solver/solver";
-import { generatePuzzle } from "../lib/utils/puzzle-generator";
-import { COLORS } from "../lib/constants";
-import { RealmColors } from "../lib/utils/solver";
 
-interface IndexPageProps {
-  initialGrid: COLORS[][];
-  targetRealmColors: RealmColors;
-}
+// interface IndexPageProps {
+//   initialGrid: COLORS[][];
+//   targetRealmColors: RealmColors;
+// }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const { initialGrid, targetRealmColors } = generatePuzzle();
+// export const getServerSideProps: GetServerSideProps = async () => {
+//   const { initialGrid, targetRealmColors } = generatePuzzle();
 
-  return {
-    props: {
-      initialGrid,
-      targetRealmColors,
-    },
-  };
-};
+//   return {
+//     props: {
+//       initialGrid,
+//       targetRealmColors,
+//     },
+//   };
+// };
 
-export default function IndexPage({
-  initialGrid,
-  targetRealmColors,
-}: IndexPageProps) {
+export default function IndexPage() {
   const router = useRouter();
   const basePath = router.basePath || "";
 
@@ -96,7 +90,10 @@ export default function IndexPage({
           content="https://Zuk310.github.io/mora-jai-solver/og-image.png"
         />
       </Head>
-      <Solver initialGrid={initialGrid} targetRealmColors={targetRealmColors} />
+      <Solver
+        initialGrid={INITIAL_GRID}
+        targetRealmColors={TARGET_REALM_COLORS}
+      />
     </>
   );
 }
