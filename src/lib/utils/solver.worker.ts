@@ -65,7 +65,7 @@ function solvePuzzleAStar(
     if (iterations >= maxIterations) {
       return { solution: null, iterations };
     }
-    if (path.length >= 25) continue;
+    if (path.length >= 35) continue;
 
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
