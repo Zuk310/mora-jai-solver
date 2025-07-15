@@ -29,9 +29,9 @@ const getBackgroundColor = (color: string) => {
 };
 
 const realmSizes = {
-  desktop: { coreSize: "80px", innerSize: "46px", offset: "-40px" },
-  tablet: { coreSize: "70px", innerSize: "40px", offset: "-35px" },
-  mobile: { coreSize: "50px", innerSize: "28px", offset: "-25px" },
+  desktop: { coreSize: "80px", innerSize: "46px", offset: "-50px" },
+  tablet: { coreSize: "70px", innerSize: "40px", offset: "-45px" },
+  mobile: { coreSize: "50px", innerSize: "28px", offset: "-30px" },
 };
 
 export const Container = styled.div<{

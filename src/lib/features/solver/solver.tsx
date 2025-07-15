@@ -1,4 +1,4 @@
-import { Footer } from "@mora-jai/lib/componets";
+import { Footer, LoadingSpinner } from "@mora-jai/lib/componets";
 import ColorPicker from "@mora-jai/lib/componets/color-picker/color-picker";
 import GuideModal from "@mora-jai/lib/componets/guide-modal/guide-modal";
 import RealmCore from "@mora-jai/lib/componets/realm-core/realm-core";
@@ -10,6 +10,7 @@ import {
   RealmColors,
   SolverResult,
 } from "@mora-jai/lib/utils/solver";
+import { generatePuzzle } from "@mora-jai/lib/utils/puzzle-generator";
 import { applyTileEffect } from "@mora-jai/lib/utils/tiles";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -33,6 +34,7 @@ import {
   MessageArea,
   MessageText,
   PuzzleContainer,
+  PuzzleWrapper,
   SideContainer,
   StyledButton,
   Subtitle,
@@ -72,18 +74,44 @@ interface ColorPickerState {
 }
 
 export interface SolverProps {
-  initialGrid: COLORS[][];
-  targetRealmColors: RealmColors;
+  initialGrid?: COLORS[][];
+  targetRealmColors?: RealmColors;
 }
 
 const Solver: React.FC<SolverProps> = (props: SolverProps) => {
-  const { initialGrid, targetRealmColors } = props;
   const workerRef = useRef<Worker | null>(null);
   const [isGuideVisible, setIsGuideVisible] = useState(false);
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
-  const [grid, setGrid] = useState<COLORS[][]>(deepCopyGrid(initialGrid));
-  const [realmColors, setRealmColors] = useState(targetRealmColors);
+  // Loading state for puzzle generation
+  const [isLoadingPuzzle, setIsLoadingPuzzle] = useState(
+    !props.initialGrid || !props.targetRealmColors
+  );
+  const [puzzleData, setPuzzleData] = useState<{
+    initialGrid: COLORS[][];
+    targetRealmColors: RealmColors;
+  } | null>(
+    props.initialGrid && props.targetRealmColors
+      ? {
+          initialGrid: props.initialGrid,
+          targetRealmColors: props.targetRealmColors,
+        }
+      : null
+  );
+
+  const [grid, setGrid] = useState<COLORS[][]>(
+    puzzleData ? deepCopyGrid(puzzleData.initialGrid) : []
+  );
+  const [realmColors, setRealmColors] = useState<RealmColors>(
+    puzzleData
+      ? puzzleData.targetRealmColors
+      : {
+          topLeft: COLORS.GREY,
+          topRight: COLORS.GREY,
+          bottomLeft: COLORS.GREY,
+          bottomRight: COLORS.GREY,
+        }
+  );
   const [solveOverlay, setSolveOverlay] = useState<boolean>(false);
   const [solutionSteps, setSolutionSteps] = useState<SolutionStep[]>([]);
   const [solving, setSolving] = useState<boolean>(false);
@@ -96,8 +124,15 @@ const Solver: React.FC<SolverProps> = (props: SolverProps) => {
   const [colorPicker, setColorPicker] = useState<ColorPickerState | null>(null);
   const [lastUserProvidedState, setLastUserProvidedState] =
     useState<SavedState>({
-      grid: deepCopyGrid(initialGrid),
-      realmColors: { ...targetRealmColors },
+      grid: puzzleData ? deepCopyGrid(puzzleData.initialGrid) : [],
+      realmColors: puzzleData
+        ? { ...puzzleData.targetRealmColors }
+        : {
+            topLeft: COLORS.GREY,
+            topRight: COLORS.GREY,
+            bottomLeft: COLORS.GREY,
+            bottomRight: COLORS.GREY,
+          },
     });
   const puzzleContainerRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +175,48 @@ const Solver: React.FC<SolverProps> = (props: SolverProps) => {
       workerRef.current?.terminate();
     };
   }, []);
+
+  // Generate puzzle on component mount if no puzzle data provided
+  useEffect(() => {
+    const generateNewPuzzle = async () => {
+      if (puzzleData) return; // Already have puzzle data
+
+      setIsLoadingPuzzle(true);
+
+      try {
+        // Add a small delay to show the loading animation
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const { initialGrid, targetRealmColors } = generatePuzzle();
+        const newPuzzleData = { initialGrid, targetRealmColors };
+
+        setPuzzleData(newPuzzleData);
+        setGrid(deepCopyGrid(initialGrid));
+        setRealmColors(targetRealmColors);
+        setLastUserProvidedState({
+          grid: deepCopyGrid(initialGrid),
+          realmColors: { ...targetRealmColors },
+        });
+
+        setMessage({
+          msg: "New puzzle generated! Ready to solve.",
+          status: "good",
+          visible: true,
+        });
+      } catch (error) {
+        console.error("Failed to generate puzzle:", error);
+        setMessage({
+          msg: "Failed to generate puzzle. Please refresh the page.",
+          status: "bad",
+          visible: true,
+        });
+      } finally {
+        setIsLoadingPuzzle(false);
+      }
+    };
+
+    generateNewPuzzle();
+  }, [puzzleData]);
 
   const resetPuzzleState = useCallback(() => {
     setSolveOverlay(false);
@@ -482,66 +559,80 @@ const Solver: React.FC<SolverProps> = (props: SolverProps) => {
         )}
         <CenterColumn>
           <PuzzleContainer ref={puzzleContainerRef} $isSolving={solving}>
-            <RealmCore
-              corner="topLeft"
-              targetColor={realmColors.topLeft}
-              onClick={(e) => handleRealmCoreClick("topLeft", e)}
-              isEditingMode={editingMode}
+            <LoadingSpinner
+              visible={isLoadingPuzzle}
+              message="Generating new puzzle"
             />
-            <RealmCore
-              corner="topRight"
-              targetColor={realmColors.topRight}
-              onClick={(e) => handleRealmCoreClick("topRight", e)}
-              isEditingMode={editingMode}
-            />
-            <RealmCore
-              corner="bottomLeft"
-              targetColor={realmColors.bottomLeft}
-              onClick={(e) => handleRealmCoreClick("bottomLeft", e)}
-              isEditingMode={editingMode}
-            />
-            <RealmCore
-              corner="bottomRight"
-              targetColor={realmColors.bottomRight}
-              onClick={(e) => handleRealmCoreClick("bottomRight", e)}
-              isEditingMode={editingMode}
-            />
-            <GridContainer>
-              {grid.map((row, rIdx) =>
-                row.map((color, cIdx) => (
-                  <Tile
-                    key={`${rIdx}-${cIdx}`}
-                    color={color}
-                    isEditingMode={editingMode}
-                    onClick={(e) => handleTileClick(rIdx, cIdx, e)}
-                  />
-                ))
-              )}
-            </GridContainer>
-            <SolutionOverlay
-              solutionSteps={solutionSteps}
-              isVisible={solveOverlay}
-            />
-            <AnimatePresence mode="wait">
-              {colorPicker && (
-                <motion.div
-                  key={"color-picker"}
-                  style={{
-                    position: "absolute",
-                    top: colorPicker.position.top,
-                    left: colorPicker.position.left,
-                    zIndex: Z_INDEX_COLOR_PICKER,
-                  }}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
+            <AnimatePresence>
+              {!isLoadingPuzzle && (
+                <PuzzleWrapper
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 >
-                  <ColorPicker
-                    onSelectColor={handleColorSelect}
-                    onClose={() => setColorPicker(null)}
+                  <RealmCore
+                    corner="topLeft"
+                    targetColor={realmColors.topLeft}
+                    onClick={(e) => handleRealmCoreClick("topLeft", e)}
+                    isEditingMode={editingMode}
                   />
-                </motion.div>
+                  <RealmCore
+                    corner="topRight"
+                    targetColor={realmColors.topRight}
+                    onClick={(e) => handleRealmCoreClick("topRight", e)}
+                    isEditingMode={editingMode}
+                  />
+                  <RealmCore
+                    corner="bottomLeft"
+                    targetColor={realmColors.bottomLeft}
+                    onClick={(e) => handleRealmCoreClick("bottomLeft", e)}
+                    isEditingMode={editingMode}
+                  />
+                  <RealmCore
+                    corner="bottomRight"
+                    targetColor={realmColors.bottomRight}
+                    onClick={(e) => handleRealmCoreClick("bottomRight", e)}
+                    isEditingMode={editingMode}
+                  />
+                  <GridContainer>
+                    {grid.map((row, rIdx) =>
+                      row.map((color, cIdx) => (
+                        <Tile
+                          key={`${rIdx}-${cIdx}`}
+                          color={color}
+                          isEditingMode={editingMode}
+                          onClick={(e) => handleTileClick(rIdx, cIdx, e)}
+                        />
+                      ))
+                    )}
+                  </GridContainer>
+                  <SolutionOverlay
+                    solutionSteps={solutionSteps}
+                    isVisible={solveOverlay}
+                  />
+                  <AnimatePresence mode="wait">
+                    {colorPicker && (
+                      <motion.div
+                        key={"color-picker"}
+                        style={{
+                          position: "absolute",
+                          top: colorPicker.position.top,
+                          left: colorPicker.position.left,
+                          zIndex: Z_INDEX_COLOR_PICKER,
+                        }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                      >
+                        <ColorPicker
+                          onSelectColor={handleColorSelect}
+                          onClose={() => setColorPicker(null)}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </PuzzleWrapper>
               )}
             </AnimatePresence>
           </PuzzleContainer>
