@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import styled, { css, keyframes, createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
@@ -413,4 +414,10 @@ export const MessageText = styled.p<{
         border-color: rgba(10, 132, 255, 0.4);
       `;
   }}
+`;
+
+export const PuzzleWrapper = styled(motion.div)`
+  position: relative;
+  width: 100%;
+  height: 100%;
 `;

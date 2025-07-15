@@ -110,6 +110,6 @@ export const ModalBackground = styled.div`
   z-index: 49;
   top: -100vh;
   left: -100vw;
-  width: 1000vw;
-  height: 1000vh;
+  width: 100vw;
+  height: 100vh;
 `;
